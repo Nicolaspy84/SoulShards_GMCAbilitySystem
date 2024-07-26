@@ -1,9 +1,11 @@
-﻿#pragma once
+#pragma once
 #include "GameplayTagContainer.h"
 #include "GMCAttributeClamp.h"
 #include "Effects/GMCAbilityEffect.h"
 #include "Net/Serialization/FastArraySerializer.h"
 #include "GMCAttributes.generated.h"
+
+class UGMC_AbilitySystemComponent;
 
 USTRUCT(BlueprintType)
 struct GMCABILITYSYSTEM_API FAttribute : public FFastArraySerializerItem
@@ -108,6 +110,16 @@ struct GMCABILITYSYSTEM_API FAttribute : public FFastArraySerializerItem
 	// Clamping will only happen if this is modified
 	UPROPERTY(EditDefaultsOnly, Category = "GMCAbilitySystem")
 	FAttributeClamp Clamp{};
+
+	/**
+	* Replicated ability system pointer used by clients to populateOnAttributeValueChangedDelegateMap.
+	* Only valid when bIsGMCBound is false.
+	*/
+	UPROPERTY()
+	UGMC_AbilitySystemComponent* AbilitySystem;
+
+	void PostReplicatedAdd(const FGMCUnboundAttributeSet& InArraySerializer);
+	void PostReplicatedChange(const struct FGMCUnboundAttributeSet& InArraySerializer);
 
 	FString ToString() const{
 		return FString::Printf(TEXT("%s : %f (Bound: %d)"), *Tag.ToString(), Value, bIsGMCBound);

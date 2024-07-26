@@ -21,6 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPreAttributeChanged, UGMCAttribu
                                              SourceAbilityComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAttributeChanged, FGameplayTag, AttributeTag, float, OldValue, float, NewValue);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FGameplayAttributeChangedNative, const FGameplayTag&, const float, const float);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeValueChanged, float, NewValue);
 				
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAncillaryTick, float, DeltaTime);
 
@@ -178,11 +179,8 @@ public:
 	FGMCAttributeSet BoundAttributes;
 
 	/** Struct containing attributes that are replicated and unbound from the GMC */
-	UPROPERTY(ReplicatedUsing = OnRep_UnBoundAttributes, BlueprintReadOnly, Category = "GMCAbilitySystem")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "GMCAbilitySystem")
 	FGMCUnboundAttributeSet UnBoundAttributes;
-
-	UFUNCTION()
-	void OnRep_UnBoundAttributes(FGMCUnboundAttributeSet PreviousAttributes);
 
 	/**
 	 * Applies an effect to the Ability Component
@@ -224,6 +222,17 @@ public:
 	// Called after an attribute has been changed
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChanged OnAttributeChanged;
+
+	/**
+	* Called after a specific attribute has been changed.
+	*/
+	UPROPERTY()
+	TMap<FGameplayTag, FOnAttributeValueChanged> OnAttributeValueChangedDelegateMap;
+
+	/**
+	* Used exclusively by the FAttributes structure to broadcast a change after client replication.
+	*/
+	void BroadcastAttributeChangeBySerializedItem(FGameplayTag AttributeTag, float NewValue);
 
 	// Called during the Ancillary Tick
 	UPROPERTY(BlueprintAssignable)
