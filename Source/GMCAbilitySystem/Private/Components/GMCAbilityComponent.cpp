@@ -1002,10 +1002,18 @@ int32 UGMC_AbilitySystemComponent::GetNumEffectByTag(FGameplayTag InEffectTag){
 	return Count;
 }
 
+FOnAttributeValueChanged* UGMC_AbilitySystemComponent::GetAttributeValueChangedDelegate(FGameplayTag AttributeTag)
+{
+	if (!AttributeTag.IsValid())
+	{
+		return nullptr;
+	}
+	return OnAttributeValueChangedDelegateMap.Find(AttributeTag);
+}
 
 void UGMC_AbilitySystemComponent::BroadcastAttributeChangeBySerializedItem(FGameplayTag AttributeTag, float NewValue)
 {
-	FOnAttributeValueChanged* Delegate = OnAttributeValueChangedDelegateMap.Find(AttributeTag);
+	FOnAttributeValueChanged* Delegate = GetAttributeValueChangedDelegate(AttributeTag);
 	if (Delegate)
 	{
 		Delegate->Broadcast(NewValue);

@@ -224,10 +224,10 @@ public:
 	FOnAttributeChanged OnAttributeChanged;
 
 	/**
-	* Called after a specific attribute has been changed.
+	* Gets the attribute changed delegate depending on the provided attribute tag.
+	* If no delegate was found, returns nullptr.
 	*/
-	UPROPERTY()
-	TMap<FGameplayTag, FOnAttributeValueChanged> OnAttributeValueChangedDelegateMap;
+	FOnAttributeValueChanged* GetAttributeValueChangedDelegate(FGameplayTag AttributeTag);
 
 	/**
 	* Used exclusively by the FAttributes structure to broadcast a change after client replication.
@@ -346,6 +346,12 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+
+	/**
+	* Called after a specific attribute has been changed.
+	*/
+	UPROPERTY()
+	TMap<FGameplayTag, FOnAttributeValueChanged> OnAttributeValueChangedDelegateMap;
 
 	// Abilities that are granted to the player (bound)
 	FGameplayTagContainer GrantedAbilityTags;
