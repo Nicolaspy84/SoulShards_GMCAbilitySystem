@@ -129,8 +129,7 @@ public:
 	bool TryActivateAbility(TSubclassOf<UGMCAbility> ActivatedAbility, const UInputAction* InputAction = nullptr);
 	
 	// Queue an ability to be executed
-	UFUNCTION(BlueprintCallable, DisplayName="Activate Ability", Category="GMAS|Abilities")
-	virtual void QueueAbility(UPARAM(meta=(Categories="Ability"))FGameplayTag InputTag, const UInputAction* InputAction = nullptr);
+	virtual void QueueAbility(FGameplayTag InputTag, const UInputAction* InputAction = nullptr);
 
 	UFUNCTION(BlueprintCallable, DisplayName="Count Queued Ability Instances", Category="GMAS|Abilities")
 	int32 GetQueuedAbilityCount(FGameplayTag AbilityTag);
@@ -154,7 +153,7 @@ public:
 	// Set an ability cooldown
 	// If it's already on cooldown, subsequent calls will overwrite it
 	UFUNCTION(BlueprintCallable, Category = "GMCAbilitySystem")
-	void SetCooldownForAbility(const FGameplayTag AbilityTag, float CooldownTime);
+	virtual void SetCooldownForAbility(const FGameplayTag AbilityTag, float CooldownTime);
 
 	UFUNCTION(BlueprintPure, Category = "GMCAbilitySystem")
 	float GetCooldownForAbility(const FGameplayTag AbilityTag) const;
