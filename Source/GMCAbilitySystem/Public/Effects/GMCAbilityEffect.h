@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -25,6 +25,26 @@ enum class EEffectState : uint8
 	Initialized,  // Applies Instantly
 	Started, // Lasts for X time
 	Ended  // Lasts forever
+};
+
+UENUM()
+enum class EEffectCategory : uint8
+{
+	// A positive effect
+	Buff UMETA(DisplayName = "Buff"),
+	// A negative effect
+	Debuff UMETA(DisplayName = "Debuff"),
+};
+
+UENUM()
+enum class EEffectResistance : uint8
+{
+	// A weak ability effect can be dispelled by a weak or a strong dispell effect
+	Weak UMETA(DisplayName = "Weak"),
+	// A strong ability effect can only be dispelled by a strong dispell effect
+	Strong UMETA(DisplayName = "Strong"),
+	// An undispellable ability effect can never be dispelled
+	Undispellable UMETA(DisplayName = "Undispellable"),
 };
 
 // Container for exposing the attribute modifier to blueprints
@@ -90,6 +110,14 @@ struct FGMCAbilityEffectData
 	// For Period effects, whether first tick should happen immediately
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	bool bPeriodTickAtStart = false;
+
+	// The category is used when dispelling effects, as they affect only certain categories
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	EEffectCategory EffectCategory = EEffectCategory::Buff;
+
+	// The resistance determines if the effect can be dispelled at all
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	EEffectResistance EffectResistance = EEffectResistance::Weak;
 
 	// Tag to identify this effect
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
