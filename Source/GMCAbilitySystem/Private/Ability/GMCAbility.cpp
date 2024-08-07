@@ -1,4 +1,4 @@
-﻿#include "Ability/GMCAbility.h"
+#include "Ability/GMCAbility.h"
 #include "GMCAbilitySystem.h"
 #include "GMCPawn.h"
 #include "Ability/Tasks/GMCAbilityTaskBase.h"
@@ -12,7 +12,7 @@ UWorld* UGMCAbility::GetWorld() const
 		// UObject::ImplementsGetWorld(), which just blithely and blindly calls GetWorld().
 		return nullptr;
 	}
-	
+
 #if WITH_EDITOR
 	if (GIsEditor)
 	{
@@ -25,9 +25,9 @@ UWorld* UGMCAbility::GetWorld() const
 	if (Contexts.Num() == 0)
 	{
 		UE_LOG(LogGMCAbilitySystem, Error, TEXT("%s: instanciated class with no valid world!"), *GetClass()->GetName())
-		return nullptr;
+			return nullptr;
 	}
-	
+
 	return Contexts[0].World();
 }
 
@@ -42,12 +42,12 @@ void UGMCAbility::Tick(float DeltaTime)
 			return;
 		}
 	}
-	
+
 	TickTasks(DeltaTime);
 	TickEvent(DeltaTime);
 }
 
-void UGMCAbility::AncillaryTick(float DeltaTime){
+void UGMCAbility::AncillaryTick(float DeltaTime) {
 	AncillaryTickTasks(DeltaTime);
 	AncillaryTickEvent(DeltaTime);
 }
@@ -56,15 +56,15 @@ void UGMCAbility::TickTasks(float DeltaTime)
 {
 	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
 	{
-		if (Task.Value == nullptr) {continue;}
+		if (Task.Value == nullptr) { continue; }
 		Task.Value->Tick(DeltaTime);
 	}
 }
 
-void UGMCAbility::AncillaryTickTasks(float DeltaTime){
+void UGMCAbility::AncillaryTickTasks(float DeltaTime) {
 	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
 	{
-		if (Task.Value == nullptr) {continue;}
+		if (Task.Value == nullptr) { continue; }
 		Task.Value->AncillaryTick(DeltaTime);
 	}
 }
@@ -81,7 +81,7 @@ void UGMCAbility::Execute(UGMC_AbilitySystemComponent* InAbilityComponent, int I
 bool UGMCAbility::CanAffordAbilityCost() const
 {
 	if (AbilityCost == nullptr || OwnerAbilityComponent == nullptr) return true;
-	
+
 	UGMCAbilityEffect* AbilityEffect = AbilityCost->GetDefaultObject<UGMCAbilityEffect>();
 	for (FGMCAttributeModifier AttributeModifier : AbilityEffect->EffectData.Modifiers)
 	{
@@ -112,15 +112,15 @@ void UGMCAbility::CommitAbilityCooldown()
 void UGMCAbility::CommitAbilityCost()
 {
 	if (AbilityCost == nullptr || OwnerAbilityComponent == nullptr) return;
-	
+
 	const UGMCAbilityEffect* EffectCDO = DuplicateObject(AbilityCost->GetDefaultObject<UGMCAbilityEffect>(), this);
 	FGMCAbilityEffectData EffectData = EffectCDO->EffectData;
 	EffectData.OwnerAbilityComponent = OwnerAbilityComponent;
 	AbilityCostInstance = OwnerAbilityComponent->ApplyAbilityEffect(DuplicateObject(EffectCDO, this), EffectData);
 }
 
-void UGMCAbility::RemoveAbilityCost(){
-	if(AbilityCostInstance){
+void UGMCAbility::RemoveAbilityCost() {
+	if (AbilityCostInstance) {
 		OwnerAbilityComponent->RemoveActiveAbilityEffect(AbilityCostInstance);
 	}
 }
@@ -139,7 +139,7 @@ void UGMCAbility::HandleTaskData(int TaskID, FInstancedStruct TaskData)
 
 void UGMCAbility::HandleTaskHeartbeat(int TaskID)
 {
-	if (RunningTasks.Contains(TaskID))
+	if (RunningTasks.Contains(TaskID) && IsValid(RunningTasks[TaskID]))
 	{
 		RunningTasks[TaskID]->Heartbeat();
 	}
@@ -179,7 +179,7 @@ void UGMCAbility::OnGameplayTaskInitialized(UGameplayTask& Task)
 	}
 	AbilityTask->SetAbilitySystemComponent(OwnerAbilityComponent);
 	AbilityTask->Ability = this;
-	
+
 }
 
 void UGMCAbility::OnGameplayTaskActivated(UGameplayTask& Task)
@@ -199,7 +199,7 @@ void UGMCAbility::FinishEndAbility() {
 		if (Task.Value == nullptr) continue;
 		Task.Value->EndTaskGMAS();
 	}
-	
+
 	AbilityState = EAbilityState::Ended;
 }
 
@@ -240,12 +240,12 @@ bool UGMCAbility::PreBeginAbility() {
 
 void UGMCAbility::BeginAbility()
 {
-	
+
 	if (bApplyCooldownAtAbilityBegin)
 	{
 		CommitAbilityCooldown();
 	}
-	
+
 	// Initialize Ability
 	AbilityState = EAbilityState::Initialized;
 
@@ -255,9 +255,9 @@ void UGMCAbility::BeginAbility()
 			UE_LOG(LogGMCAbilitySystem, Warning, TEXT("Ability (tag) %s is trying to cancel itself, if you attempt to reset the ability, please use //TODO instead"), *AbilityTag.ToString());
 			continue;
 		}
-		
+
 		if (OwnerAbilityComponent->EndAbilitiesByTag(AbilityToCancelTag)) {
-			UE_LOG(LogGMCAbilitySystem, Verbose, TEXT("Ability (tag) %s has been cancelled by (tag) %s"), *AbilityTag.ToString(), *AbilityToCancelTag.ToString());	
+			UE_LOG(LogGMCAbilitySystem, Verbose, TEXT("Ability (tag) %s has been cancelled by (tag) %s"), *AbilityTag.ToString(), *AbilityToCancelTag.ToString());
 		}
 	}
 
@@ -286,16 +286,16 @@ AActor* UGMCAbility::GetOwnerActor() const
 	return OwnerAbilityComponent->GetOwner();
 }
 
-AGMC_Pawn* UGMCAbility::GetOwnerPawn() const{
-	if (AGMC_Pawn* OwningPawn = Cast<AGMC_Pawn>(GetOwnerActor())){
+AGMC_Pawn* UGMCAbility::GetOwnerPawn() const {
+	if (AGMC_Pawn* OwningPawn = Cast<AGMC_Pawn>(GetOwnerActor())) {
 		return OwningPawn;
 	}
 	return nullptr;
 }
 
-AGMC_PlayerController* UGMCAbility::GetOwningPlayerController() const{
-	if (const AGMC_Pawn* OwningPawn = GetOwnerPawn()){
-		if(AGMC_PlayerController* OwningPC = Cast<AGMC_PlayerController>(OwningPawn->GetController())){
+AGMC_PlayerController* UGMCAbility::GetOwningPlayerController() const {
+	if (const AGMC_Pawn* OwningPawn = GetOwnerPawn()) {
+		if (AGMC_PlayerController* OwningPC = Cast<AGMC_PlayerController>(OwningPawn->GetController())) {
 			return OwningPC;
 		}
 	}
