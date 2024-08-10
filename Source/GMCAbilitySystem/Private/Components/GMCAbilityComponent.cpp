@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/GMCAbilityComponent.h"
@@ -577,11 +577,14 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 			NewAttribute.Clamp.AbilityComponent = this;
 			NewAttribute.bIsGMCBound = AttributeData.bGMCBound;
 			NewAttribute.Init();
+
+			OnAttributeValueChangedDelegateMap.Add(NewAttribute.Tag, FOnAttributeValueChanged());
 			
 			if(AttributeData.bGMCBound){
 				BoundAttributes.AddAttribute(NewAttribute);
 			}
 			else if (GetOwnerRole() == ROLE_Authority || GetNetMode() == NM_Standalone) {
+				NewAttribute.AbilitySystem = this;
 				// FFastArraySerializer will duplicate all attributes on first replication if we
 				// add the attributes on the clients as well.
 				UnBoundAttributes.AddAttribute(NewAttribute);
@@ -927,27 +930,6 @@ void UGMC_AbilitySystemComponent::InitializeStartingAbilities()
 	}
 }
 
-void UGMC_AbilitySystemComponent::OnRep_UnBoundAttributes(FGMCUnboundAttributeSet PreviousAttributes)
-{
-	const TArray<FAttribute>& OldAttributes = PreviousAttributes.Items;
-	const TArray<FAttribute>& CurrentAttributes = UnBoundAttributes.Items;
-
-	TMap<FGameplayTag, float> OldValues;
-	
-	for (const FAttribute& Attribute : OldAttributes){
-		OldValues.Add(Attribute.Tag, Attribute.Value);
-	}
-
-	for (const FAttribute& Attribute : CurrentAttributes){
-		if (OldValues.Contains(Attribute.Tag) && OldValues[Attribute.Tag] != Attribute.Value){
-			OnAttributeChanged.Broadcast(Attribute.Tag, OldValues[Attribute.Tag], Attribute.Value);
-			NativeAttributeChangeDelegate.Broadcast(Attribute.Tag, OldValues[Attribute.Tag], Attribute.Value);
-
-			UnBoundAttributes.MarkAttributeDirty(Attribute);
-		}
-	}
-}
-
 //BP Version
 UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(TSubclassOf<UGMCAbilityEffect> Effect, FGMCAbilityEffectData InitializationData)
 {
@@ -1048,6 +1030,28 @@ int32 UGMC_AbilitySystemComponent::GetNumEffectByTag(FGameplayTag InEffectTag){
 	return Count;
 }
 
+FOnAttributeValueChanged* UGMC_AbilitySystemComponent::GetAttributeValueChangedDelegate(FGameplayTag AttributeTag)
+{
+	if (!AttributeTag.IsValid())
+	{
+		return nullptr;
+	}
+	return OnAttributeValueChangedDelegateMap.Find(AttributeTag);
+}
+
+void UGMC_AbilitySystemComponent::BroadcastAttributeChangeBySerializedItem(FGameplayTag AttributeTag, float NewValue)
+{
+	FOnAttributeValueChanged* Delegate = GetAttributeValueChangedDelegate(AttributeTag);
+	if (Delegate)
+	{
+		Delegate->Broadcast(NewValue);
+	}
+
+	// We don't have the information over the previous value here, so we send 0 as a default value
+	float PreviousValue = 0.f;
+	OnAttributeChanged.Broadcast(AttributeTag, PreviousValue, NewValue);
+	NativeAttributeChangeDelegate.Broadcast(AttributeTag, PreviousValue, NewValue);
+}
 
 TArray<const FAttribute*> UGMC_AbilitySystemComponent::GetAllAttributes() const{
 	TArray<const FAttribute*> AllAttributes;
@@ -1183,7 +1187,12 @@ void UGMC_AbilitySystemComponent::ApplyAbilityEffectModifier(FGMCAttributeModifi
 		{
 			OnAttributeChanged.Broadcast(AffectedAttribute->Tag, OldValue, AffectedAttribute->Value);
 			NativeAttributeChangeDelegate.Broadcast(AffectedAttribute->Tag, OldValue, AffectedAttribute->Value);
+			if (FOnAttributeValueChanged* Delegate = OnAttributeValueChangedDelegateMap.Find(AffectedAttribute->Tag))
+			{
+				Delegate->Broadcast(AffectedAttribute->Value);
+			}
 		}
+		
 
 		BoundAttributes.MarkAttributeDirty(*AffectedAttribute);
 		UnBoundAttributes.MarkAttributeDirty(*AffectedAttribute);

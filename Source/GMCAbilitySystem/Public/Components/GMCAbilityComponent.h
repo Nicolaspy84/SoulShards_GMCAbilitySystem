@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -21,6 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPreAttributeChanged, UGMCAttribu
                                              SourceAbilityComponent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAttributeChanged, FGameplayTag, AttributeTag, float, OldValue, float, NewValue);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FGameplayAttributeChangedNative, const FGameplayTag&, const float, const float);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeValueChanged, float, NewValue);
 				
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAncillaryTick, float, DeltaTime);
 
@@ -134,8 +135,7 @@ public:
 	bool TryActivateAbility(TSubclassOf<UGMCAbility> ActivatedAbility, const UInputAction* InputAction = nullptr);
 	
 	// Queue an ability to be executed
-	UFUNCTION(BlueprintCallable, DisplayName="Activate Ability", Category="GMAS|Abilities")
-	void QueueAbility(UPARAM(meta=(Categories="Input"))FGameplayTag InputTag, const UInputAction* InputAction = nullptr);
+	virtual void QueueAbility(FGameplayTag InputTag, const UInputAction* InputAction = nullptr);
 
 	UFUNCTION(BlueprintCallable, DisplayName="Count Queued Ability Instances", Category="GMAS|Abilities")
 	int32 GetQueuedAbilityCount(FGameplayTag AbilityTag);
@@ -159,7 +159,7 @@ public:
 	// Set an ability cooldown
 	// If it's already on cooldown, subsequent calls will overwrite it
 	UFUNCTION(BlueprintCallable, Category = "GMCAbilitySystem")
-	void SetCooldownForAbility(const FGameplayTag AbilityTag, float CooldownTime);
+	virtual void SetCooldownForAbility(const FGameplayTag AbilityTag, float CooldownTime);
 
 	UFUNCTION(BlueprintPure, Category = "GMCAbilitySystem")
 	float GetCooldownForAbility(const FGameplayTag AbilityTag) const;
@@ -184,11 +184,8 @@ public:
 	FGMCAttributeSet BoundAttributes;
 
 	/** Struct containing attributes that are replicated and unbound from the GMC */
-	UPROPERTY(ReplicatedUsing = OnRep_UnBoundAttributes, BlueprintReadOnly, Category = "GMCAbilitySystem")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "GMCAbilitySystem")
 	FGMCUnboundAttributeSet UnBoundAttributes;
-
-	UFUNCTION()
-	void OnRep_UnBoundAttributes(FGMCUnboundAttributeSet PreviousAttributes);
 
 	/**
 	 * Applies an effect to the Ability Component
@@ -230,6 +227,17 @@ public:
 	// Called after an attribute has been changed
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChanged OnAttributeChanged;
+
+	/**
+	* Gets the attribute changed delegate depending on the provided attribute tag.
+	* If no delegate was found, returns nullptr.
+	*/
+	FOnAttributeValueChanged* GetAttributeValueChangedDelegate(FGameplayTag AttributeTag);
+
+	/**
+	* Used exclusively by the FAttributes structure to broadcast a change after client replication.
+	*/
+	void BroadcastAttributeChangeBySerializedItem(FGameplayTag AttributeTag, float NewValue);
 
 	// Called during the Ancillary Tick
 	UPROPERTY(BlueprintAssignable)
@@ -344,6 +352,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	/**
+	* Called after a specific attribute has been changed.
+	*/
+	UPROPERTY()
+	TMap<FGameplayTag, FOnAttributeValueChanged> OnAttributeValueChangedDelegateMap;
+
 	// Abilities that are granted to the player (bound)
 	FGameplayTagContainer GrantedAbilityTags;
 
@@ -373,14 +387,14 @@ protected:
 	void ClearAbilityAndTaskData();
 
 	void SendTaskDataToActiveAbility(bool bFromMovement);
+	
+	// Map of Ability Tags to Ability Classes
+	TMap<FGameplayTag, FAbilityMapData> AbilityMap;
 
 private:
 	// Array of data objects to initialize the component's ability map
 	UPROPERTY(EditDefaultsOnly, Category="Ability")
 	TArray<TObjectPtr<UGMCAbilityMapData>> AbilityMaps;
-	
-	// Map of Ability Tags to Ability Classes
-	TMap<FGameplayTag, FAbilityMapData> AbilityMap;
 
 	// List of filtered tag delegates to call when tags change.
 	TArray<TPair<FGameplayTagContainer, FGameplayTagFilteredMulticastDelegate>> FilteredTagDelegates;

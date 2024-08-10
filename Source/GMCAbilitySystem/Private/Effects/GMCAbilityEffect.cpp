@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Effects/GMCAbilityEffect.h"
@@ -193,7 +193,23 @@ void UGMCAbilityEffect::AddTagsToOwner()
 
 void UGMCAbilityEffect::RemoveTagsFromOwner()
 {
-	for (const FGameplayTag Tag : EffectData.GrantedTags)
+	if (EffectData.GrantedTags.Num() == 0)
+	{
+		return;
+	}
+
+	// We only remove tags which are not currently granted by other ability effects
+	FGameplayTagContainer TagsToRemove = EffectData.GrantedTags;
+	for (const TPair<int, UGMCAbilityEffect*> Effect : OwnerAbilityComponent->GetActiveEffects())
+	{
+		if (IsValid(Effect.Value) && Effect.Value->CurrentState == EEffectState::Started 
+								  && Effect.Value->EffectData.GrantedTags.HasAnyExact(TagsToRemove))
+		{
+			TagsToRemove.RemoveTags(Effect.Value->EffectData.GrantedTags);
+		}
+	}
+
+	for (const FGameplayTag Tag : TagsToRemove)
 	{
 		OwnerAbilityComponent->RemoveActiveTag(Tag);
 	}
@@ -209,7 +225,23 @@ void UGMCAbilityEffect::AddAbilitiesToOwner()
 
 void UGMCAbilityEffect::RemoveAbilitiesFromOwner()
 {
-	for (const FGameplayTag Tag : EffectData.GrantedAbilities)
+	if (EffectData.GrantedAbilities.Num() == 0)
+	{
+		return;
+	}
+
+	// We only remove abilities which are not currently granted by other ability effects
+	FGameplayTagContainer AbilitiesToRemove = EffectData.GrantedAbilities;
+	for (const TPair<int, UGMCAbilityEffect*> Effect : OwnerAbilityComponent->GetActiveEffects())
+	{
+		if (IsValid(Effect.Value) && Effect.Value->CurrentState == EEffectState::Started
+								  && Effect.Value->EffectData.GrantedAbilities.HasAnyExact(AbilitiesToRemove))
+		{
+			AbilitiesToRemove.RemoveTags(Effect.Value->EffectData.GrantedAbilities);
+		}
+	}
+
+	for (const FGameplayTag Tag : AbilitiesToRemove)
 	{
 		OwnerAbilityComponent->RemoveGrantedAbilityByTag(Tag);
 	}
