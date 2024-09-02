@@ -391,6 +391,12 @@ protected:
 	// Map of Ability Tags to Ability Classes
 	TMap<FGameplayTag, FAbilityMapData> AbilityMap;
 
+	UPROPERTY()
+	TMap<int, UGMCAbility*> ActiveAbilities;
+
+	UPROPERTY()
+	TMap<int, UGMCAbilityEffect*> ActiveEffects;
+
 private:
 	// Array of data objects to initialize the component's ability map
 	UPROPERTY(EditDefaultsOnly, Category="Ability")
@@ -420,9 +426,6 @@ private:
 	FEffectStatePrediction EffectStatePrediction{};
 
 	TArray<FEffectStatePrediction> QueuedEffectStates;
-
-	UPROPERTY()
-	TMap<int, UGMCAbility*> ActiveAbilities;
 
 	UPROPERTY()
 	TMap<FGameplayTag, float> ActiveCooldowns;
@@ -469,9 +472,6 @@ private:
 
 	// Check if any effects have been removed by the server and remove them locally
 	void CheckRemovedEffects();
-
-	UPROPERTY()
-	TMap<int, UGMCAbilityEffect*> ActiveEffects;
 
 	// Effect IDs that have been processed and don't need to be remade when ActiveEffectsData is replicated
 	// This need to be persisted for a while
