@@ -397,6 +397,8 @@ protected:
 	UPROPERTY()
 	TMap<int, UGMCAbilityEffect*> ActiveEffects;
 
+	FGameplayAttributeChangedNative NativeAttributeChangeDelegate;
+
 private:
 	// Array of data objects to initialize the component's ability map
 	UPROPERTY(EditDefaultsOnly, Category="Ability")
@@ -404,8 +406,6 @@ private:
 
 	// List of filtered tag delegates to call when tags change.
 	TArray<TPair<FGameplayTagContainer, FGameplayTagFilteredMulticastDelegate>> FilteredTagDelegates;
-
-	FGameplayAttributeChangedNative NativeAttributeChangeDelegate;
 	
 	// Get the map from the data asset and apply that to the component's map
 	void InitializeAbilityMap();
