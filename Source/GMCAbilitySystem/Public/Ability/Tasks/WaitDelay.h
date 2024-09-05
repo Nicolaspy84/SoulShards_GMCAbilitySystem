@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "GMCAbilityTaskBase.h"
 #include "WaitDelay.generated.h"
 
@@ -13,6 +13,7 @@ class GMCABILITYSYSTEM_API UGMCAbilityTask_WaitDelay : public UGMCAbilityTaskBas
 
 	virtual void Activate() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void AncillaryTick(float DeltaTime) override;
 	
 	UPROPERTY(BlueprintAssignable)
 	FGMCAbilityTaskWaitDelayOutputPin Completed;

@@ -1,4 +1,4 @@
-﻿#include "Ability/Tasks/WaitDelay.h"
+#include "Ability/Tasks/WaitDelay.h"
 #include "Components/GMCAbilityComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -29,6 +29,24 @@ void UGMCAbilityTask_WaitDelay::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (TimeStarted + Time <= AbilitySystemComponent->ActionTimer)
+	{
+		OnTimeFinish();
+	}
+}
+
+void UGMCAbilityTask_WaitDelay::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (Ability->bActivateOnMovementTick && TimeStarted + Time <= AbilitySystemComponent->ActionTimer)
+	{
+		OnTimeFinish();
+	}
+}
+
+void UGMCAbilityTask_WaitDelay::AncillaryTick(float DeltaTime)
+{
+	Super::AncillaryTick(DeltaTime);
+	if (!Ability->bActivateOnMovementTick && TimeStarted + Time <= AbilitySystemComponent->ActionTimer)
 	{
 		OnTimeFinish();
 	}
