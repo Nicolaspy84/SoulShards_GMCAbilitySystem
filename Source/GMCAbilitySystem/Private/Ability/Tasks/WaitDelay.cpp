@@ -28,15 +28,6 @@ void UGMCAbilityTask_WaitDelay::Activate()
 void UGMCAbilityTask_WaitDelay::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (TimeStarted + Time <= AbilitySystemComponent->ActionTimer)
-	{
-		OnTimeFinish();
-	}
-}
-
-void UGMCAbilityTask_WaitDelay::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 	if (Ability->bActivateOnMovementTick && TimeStarted + Time <= AbilitySystemComponent->ActionTimer)
 	{
 		OnTimeFinish();
