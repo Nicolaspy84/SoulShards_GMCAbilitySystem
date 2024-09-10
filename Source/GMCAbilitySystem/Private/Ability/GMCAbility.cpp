@@ -56,7 +56,7 @@ void UGMCAbility::TickTasks(float DeltaTime)
 {
 	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
 	{
-		if (Task.Value == nullptr) { continue; }
+		if (Task.Value == nullptr || Task.Value->GetState() != EGameplayTaskState::Active) { continue; }
 		Task.Value->Tick(DeltaTime);
 	}
 }
@@ -64,7 +64,7 @@ void UGMCAbility::TickTasks(float DeltaTime)
 void UGMCAbility::AncillaryTickTasks(float DeltaTime) {
 	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
 	{
-		if (Task.Value == nullptr) { continue; }
+		if (Task.Value == nullptr || Task.Value->GetState() != EGameplayTaskState::Active) { continue; }
 		Task.Value->AncillaryTick(DeltaTime);
 	}
 }
