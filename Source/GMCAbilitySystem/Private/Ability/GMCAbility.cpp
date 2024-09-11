@@ -54,17 +54,21 @@ void UGMCAbility::AncillaryTick(float DeltaTime) {
 
 void UGMCAbility::TickTasks(float DeltaTime)
 {
-	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
+	// We make a copy of the running tasks map, as ticking the task may end it or end the ability
+	TArray<TPair<int, UGMCAbilityTaskBase*>> Tasks = RunningTasks.Array();
+	for (TPair<int, UGMCAbilityTaskBase*>& Task: Tasks)
 	{
-		if (Task.Value == nullptr || Task.Value->GetState() != EGameplayTaskState::Active) { continue; }
+		if (AbilityState == EAbilityState::Ended || !IsValid(Task.Value) || Task.Value->GetState() != EGameplayTaskState::Active) { continue; }
 		Task.Value->Tick(DeltaTime);
 	}
 }
 
-void UGMCAbility::AncillaryTickTasks(float DeltaTime) {
-	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
+void UGMCAbility::AncillaryTickTasks(float DeltaTime)
+{
+	TArray<TPair<int, UGMCAbilityTaskBase*>> Tasks = RunningTasks.Array();
+	for (TPair<int, UGMCAbilityTaskBase*>& Task : Tasks)
 	{
-		if (Task.Value == nullptr || Task.Value->GetState() != EGameplayTaskState::Active) { continue; }
+		if (AbilityState == EAbilityState::Ended || !IsValid(Task.Value) || Task.Value->GetState() != EGameplayTaskState::Active) { continue; }
 		Task.Value->AncillaryTick(DeltaTime);
 	}
 }
