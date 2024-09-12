@@ -695,7 +695,7 @@ void UGMC_AbilitySystemComponent::TickActiveEffects(float DeltaTime)
 			ProcessedEffectIDs.Contains(Effect.Key) &&
 			!ProcessedEffectIDs[Effect.Key] && Effect.Value->ClientEffectApplicationTime + ClientEffectApplicationTimeout < ActionTimer)
 		{
-			UE_LOG(LogGMCAbilitySystem, Error, TEXT("Effect Not Confirmed By Server: %d, Removing..."), Effect.Key);
+			UE_LOG(LogGMCAbilitySystem, Error, TEXT("Effect Not Confirmed By Server: %d, %s, Removing..."), Effect.Key, *Effect.Value->EffectData.EffectTag.ToString());
 			Effect.Value->EndEffect();
 			CompletedActiveEffects.Push(Effect.Key);
 		}
