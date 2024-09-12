@@ -43,6 +43,11 @@ void UGMCAbility::Tick(float DeltaTime)
 		}
 	}
 
+	if (bEndPending) {
+		EndAbility();
+		return;
+	}
+	
 	TickTasks(DeltaTime);
 	TickEvent(DeltaTime);
 }
@@ -129,6 +134,23 @@ void UGMCAbility::RemoveAbilityCost() {
 	}
 }
 
+
+void UGMCAbility::ModifyBlockOtherAbility(FGameplayTagContainer TagToAdd, FGameplayTagContainer TagToRemove) {
+	for (auto Tag : TagToAdd) {
+		BlockOtherAbility.AddTag(Tag);
+	}
+
+	for (auto Tag : TagToRemove) {
+		BlockOtherAbility.RemoveTag(Tag);
+	}
+}
+
+
+void UGMCAbility::ResetBlockOtherAbility() {
+	BlockOtherAbility = GetClass()->GetDefaultObject<UGMCAbility>()->BlockOtherAbility;
+}
+
+
 void UGMCAbility::HandleTaskData(int TaskID, FInstancedStruct TaskData)
 {
 	const FGMCAbilityTaskData TaskDataFromInstance = TaskData.Get<FGMCAbilityTaskData>();
@@ -143,7 +165,7 @@ void UGMCAbility::HandleTaskData(int TaskID, FInstancedStruct TaskData)
 
 void UGMCAbility::HandleTaskHeartbeat(int TaskID)
 {
-	if (RunningTasks.Contains(TaskID) && IsValid(RunningTasks[TaskID]))
+	if (RunningTasks.Contains(TaskID) && RunningTasks[TaskID] != nullptr) // Do we ever remove orphans tasks ?
 	{
 		RunningTasks[TaskID]->Heartbeat();
 	}
@@ -153,6 +175,12 @@ void UGMCAbility::ServerConfirm()
 {
 	bServerConfirmed = true;
 }
+
+
+void UGMCAbility::SetPendingEnd() {
+	bEndPending = true;
+}
+
 
 UGameplayTasksComponent* UGMCAbility::GetGameplayTasksComponent(const UGameplayTask& Task) const
 {
@@ -214,7 +242,6 @@ bool UGMCAbility::IsOnCooldown() const
 }
 
 
-
 bool UGMCAbility::PreExecuteCheckEvent_Implementation() {
 	return true;
 }
@@ -244,7 +271,13 @@ bool UGMCAbility::PreBeginAbility() {
 
 void UGMCAbility::BeginAbility()
 {
+	
+	if (OwnerAbilityComponent->IsAbilityTagBlocked(AbilityTag)) {
+		CancelAbility();
+		return;
+	}
 
+	
 	if (bApplyCooldownAtAbilityBegin)
 	{
 		CommitAbilityCooldown();
