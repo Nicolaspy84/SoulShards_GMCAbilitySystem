@@ -123,7 +123,7 @@ struct FGMCAbilityEffectData
 	EEffectResistance EffectResistance = EEffectResistance::Weak;
 
 	// Time in seconds that the client has to apply itself an external effect before the server will force it. If this time is reach, a rollback is likely to happen.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem", AdvancedDisplay)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	float ClientGraceTime = 1.f;
 	
 	UPROPERTY()
