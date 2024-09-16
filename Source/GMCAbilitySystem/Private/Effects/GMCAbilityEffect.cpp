@@ -80,6 +80,17 @@ void UGMCAbilityEffect::StartEffect()
 		return;
 	}
 
+	// Add one effect stack
+	if (EffectData.EffectStackAttributeTag.IsValid() && OwnerAbilityComponent->GetAttributeByTag(EffectData.EffectStackAttributeTag))
+	{
+		FGMCAttributeModifier IncrementStack;
+		IncrementStack.AttributeTag = EffectData.EffectStackAttributeTag;
+		IncrementStack.Value = 1.f;
+		IncrementStack.ModifierType = EModifierType::Add;
+
+		OwnerAbilityComponent->ApplyAbilityEffectModifier(IncrementStack, false, false);
+	}
+
 	// Duration Effects that aren't periodic alter modifiers, not base
 	if (!EffectData.bIsInstant && EffectData.Period == 0)
 	{
@@ -119,6 +130,34 @@ void UGMCAbilityEffect::EndEffect()
 
 	// Only remove tags and abilities if the effect has started
 	if (!bHasStarted) return;
+
+	// Revert stacks if there are no other stacks remaining
+	if (EffectData.EffectStackAttributeTag.IsValid() && OwnerAbilityComponent->GetAttributeByTag(EffectData.EffectStackAttributeTag))
+	{
+		bool bResetStacks = true;
+		for (const TPair<int, UGMCAbilityEffect*> EffectPair : OwnerAbilityComponent->GetActiveEffects())
+		{
+			if (IsValid(EffectPair.Value) &&
+				EffectPair.Value != this &&
+				EffectPair.Value->CurrentState == EGMASEffectState::Started &&
+				EffectPair.Value->EffectData.EffectStackAttributeTag == EffectData.EffectStackAttributeTag)
+			{
+				bResetStacks = false;
+				break;
+			}
+		}
+
+		if (bResetStacks)
+		{
+			FGMCAttributeModifier ResetStacksModifier;
+			ResetStacksModifier.AttributeTag = EffectData.EffectStackAttributeTag;
+			ResetStacksModifier.Value = OwnerAbilityComponent->GetAttributeValueByTag(EffectData.EffectStackAttributeTag);
+			ResetStacksModifier.ModifierType = EModifierType::Add;
+
+			OwnerAbilityComponent->ApplyAbilityEffectModifier(ResetStacksModifier, false, true);
+		}
+		
+	}
 
 	if (EffectData.bNegateEffectAtEnd)
 	{

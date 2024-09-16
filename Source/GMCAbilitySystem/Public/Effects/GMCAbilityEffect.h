@@ -27,26 +27,6 @@ enum class EGMASEffectState : uint8
 	Ended  // Lasts forever
 };
 
-UENUM()
-enum class EEffectCategory : uint8
-{
-	// A positive effect
-	Buff UMETA(DisplayName = "Buff"),
-	// A negative effect
-	Debuff UMETA(DisplayName = "Debuff"),
-};
-
-UENUM()
-enum class EEffectResistance : uint8
-{
-	// A weak ability effect can be dispelled by a weak or a strong dispell effect
-	Weak UMETA(DisplayName = "Weak"),
-	// A strong ability effect can only be dispelled by a strong dispell effect
-	Strong UMETA(DisplayName = "Strong"),
-	// An undispellable ability effect can never be dispelled
-	Undispellable UMETA(DisplayName = "Undispellable"),
-};
-
 // Container for exposing the attribute modifier to blueprints
 UCLASS()
 class GMCABILITYSYSTEM_API UGMCAttributeModifierContainer : public UObject
@@ -114,14 +94,6 @@ struct FGMCAbilityEffectData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	bool bPeriodTickAtStart = false;
 
-	// The category is used when dispelling effects, as they affect only certain categories
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	EEffectCategory EffectCategory = EEffectCategory::Buff;
-
-	// The resistance determines if the effect can be dispelled at all
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	EEffectResistance EffectResistance = EEffectResistance::Weak;
-
 	// Time in seconds that the client has to apply itself an external effect before the server will force it. If this time is reach, a rollback is likely to happen.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	float ClientGraceTime = 1.f;
@@ -132,6 +104,25 @@ struct FGMCAbilityEffectData
 	// Tag to identify this effect
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTag EffectTag;
+
+	/**
+	* If this tag is set, the effect will be able to stack and will affect the provided atribute (if the attribute is properly setup).
+	* Note that 2 effects with a different EffectTag can share the same EffectStackAttributeTag.
+	* Effect stacking works as follows:
+	* - whenever a new effect with an EffectStackAttributeTag starts, the corresponding attribute is incremented by 1
+	* - whenever an effect with an EffectStackAttributeTag ends and is the last one with the EffectStackAttributeTag, the attribute value is set back to 0
+	* - whenever an effect with an EffectStackAttributeTag ends but is not the last one with the EffectStackAttributeTag, nothing happens
+	* Note that effect stacking only works if the effect has a duration (ie it's not instant).
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	FGameplayTag EffectStackAttributeTag;
+
+	/**
+	* Contains any relevant metadata for this effect.
+	* This includes data such as effect persistance, type (buff, debuff), effect debuffing etc.
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCABilitySystem")
+	FGameplayTagContainer EffectMetaData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer GrantedTags;
