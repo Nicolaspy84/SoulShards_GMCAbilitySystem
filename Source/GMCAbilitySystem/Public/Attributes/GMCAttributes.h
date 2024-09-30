@@ -121,7 +121,7 @@ struct GMCABILITYSYSTEM_API FAttribute : public FFastArraySerializerItem
 	* Only valid when bIsGMCBound is false.
 	*/
 	UPROPERTY()
-	UGMC_AbilitySystemComponent* AbilitySystem;
+	UGMC_AbilitySystemComponent* AbilitySystem = nullptr;
 
 	void PostReplicatedAdd(const FGMCUnboundAttributeSet& InArraySerializer);
 	void PostReplicatedChange(const struct FGMCUnboundAttributeSet& InArraySerializer);
