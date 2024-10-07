@@ -946,36 +946,45 @@ void UGMC_AbilitySystemComponent::ClientHandlePendingEffect() {
 	{
 		FGMCOuterApplicationWrapper& LateApplicationData = PendingApplicationClient[i];
 
+		// If this is running on the server, it means that the pawn is a server controlled pawn.
+		// In this situation, we do not want the effect to be applied in this function.
+		// It will be applied in the ServerHandlePendingEffect function, which runs just after it.
+		// If we did not skip this, we would be creating a duplicate effect.
+		if (!HasAuthority())
+		{
 			switch (LateApplicationData.Type) {
-				case EGMC_AddEffect: {
-						const FGMCOuterEffectAdd& Data = LateApplicationData.OuterApplicationData.Get<FGMCOuterEffectAdd>();
+			case EGMC_AddEffect: {
+				const FGMCOuterEffectAdd& Data = LateApplicationData.OuterApplicationData.Get<FGMCOuterEffectAdd>();
 
-						if (Data.EffectClass == nullptr) {
-							UE_LOG(LogGMCAbilitySystem, Error, TEXT("ClientHandlePendingEffect: EffectClass is null"));
-							break;
-						}
-					
-						UGMCAbilityEffect* CDO = Data.EffectClass->GetDefaultObject<UGMCAbilityEffect>();
+				if (Data.EffectClass == nullptr) {
+					UE_LOG(LogGMCAbilitySystem, Error, TEXT("ClientHandlePendingEffect: EffectClass is null"));
+					break;
+				}
 
-						if (CDO == nullptr) {
-							UE_LOG(LogGMCAbilitySystem, Error, TEXT("ClientHandlePendingEffect: CDO is null"));
-							break;
-						}
-					
-						UGMCAbilityEffect* AbilityEffect = DuplicateObject(CDO, this);
-						AbilityEffect->EffectData.EffectID = LateApplicationData.LateApplicationID;
-						FGMCAbilityEffectData EffectData = Data.InitializationData.IsValid() ?  Data.InitializationData : AbilityEffect->EffectData;
-						ApplyAbilityEffect(AbilityEffect, EffectData);
-					} break;
-				case EGMC_RemoveEffect: {
-						const FGMCOuterEffectRemove& Data = LateApplicationData.OuterApplicationData.Get<FGMCOuterEffectRemove>();
-						RemoveEffectById(Data.Ids);
-					} break;
+				UGMCAbilityEffect* CDO = Data.EffectClass->GetDefaultObject<UGMCAbilityEffect>();
+
+				if (CDO == nullptr) {
+					UE_LOG(LogGMCAbilitySystem, Error, TEXT("ClientHandlePendingEffect: CDO is null"));
+					break;
+				}
+
+				UGMCAbilityEffect* AbilityEffect = DuplicateObject(CDO, this);
+				AbilityEffect->EffectData.EffectID = LateApplicationData.LateApplicationID;
+				FGMCAbilityEffectData EffectData = Data.InitializationData.IsValid() ? Data.InitializationData : AbilityEffect->EffectData;
+				ApplyAbilityEffect(AbilityEffect, EffectData);
+			} break;
+			case EGMC_RemoveEffect: {
+				const FGMCOuterEffectRemove& Data = LateApplicationData.OuterApplicationData.Get<FGMCOuterEffectRemove>();
+				RemoveEffectById(Data.Ids);
+			} break;
 			}
-		
-			PendingApplicationClient.RemoveAt(i);
-			AcknowledgeId.GetMutable<FGMCAcknowledgeId>().Id.Add(LateApplicationData.LateApplicationID);
 		}
+
+		// Following the comment above, it's important to add the LateApplicationID to the AcknowledgeId struct on the server as well.
+		// This way, when running ServerHandlePendingEffect, the effect can be properly added.
+		PendingApplicationClient.RemoveAt(i);
+		AcknowledgeId.GetMutable<FGMCAcknowledgeId>().Id.Add(LateApplicationData.LateApplicationID);
+	}
 }
 
 
