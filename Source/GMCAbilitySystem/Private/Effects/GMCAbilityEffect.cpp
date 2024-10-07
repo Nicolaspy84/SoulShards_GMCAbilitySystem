@@ -74,7 +74,7 @@ void UGMCAbilityEffect::StartEffect()
 	{
 		for (const FGMCAttributeModifier& Modifier : EffectData.Modifiers)
 		{
-			OwnerAbilityComponent->ApplyAbilityEffectModifier(Modifier, true);
+			OwnerAbilityComponent->ApplyAbilityEffectModifier(Modifier, true, false, EffectData.SourceAbilityComponent);
 		}
 		EndEffect();
 		return;
@@ -88,7 +88,7 @@ void UGMCAbilityEffect::StartEffect()
 		IncrementStack.Value = 1.f;
 		IncrementStack.ModifierType = EModifierType::Add;
 
-		OwnerAbilityComponent->ApplyAbilityEffectModifier(IncrementStack, false, false);
+		OwnerAbilityComponent->ApplyAbilityEffectModifier(IncrementStack, false, false, EffectData.SourceAbilityComponent);
 	}
 
 	// Duration Effects that aren't periodic alter modifiers, not base
@@ -97,7 +97,7 @@ void UGMCAbilityEffect::StartEffect()
 		EffectData.bNegateEffectAtEnd = true;
 		for (const FGMCAttributeModifier& Modifier : EffectData.Modifiers)
 		{
-			OwnerAbilityComponent->ApplyAbilityEffectModifier(Modifier, false);
+			OwnerAbilityComponent->ApplyAbilityEffectModifier(Modifier, false, false, EffectData.SourceAbilityComponent);
 		}
 	}
 
@@ -154,7 +154,7 @@ void UGMCAbilityEffect::EndEffect()
 			ResetStacksModifier.Value = OwnerAbilityComponent->GetAttributeValueByTag(EffectData.EffectStackAttributeTag);
 			ResetStacksModifier.ModifierType = EModifierType::Add;
 
-			OwnerAbilityComponent->ApplyAbilityEffectModifier(ResetStacksModifier, false, true);
+			OwnerAbilityComponent->ApplyAbilityEffectModifier(ResetStacksModifier, false, true, EffectData.SourceAbilityComponent);
 		}
 		
 	}
@@ -163,7 +163,7 @@ void UGMCAbilityEffect::EndEffect()
 	{
 		for (const FGMCAttributeModifier& Modifier : EffectData.Modifiers)
 		{
-			OwnerAbilityComponent->ApplyAbilityEffectModifier(Modifier, false, true);
+			OwnerAbilityComponent->ApplyAbilityEffectModifier(Modifier, false, true, EffectData.SourceAbilityComponent);
 		}
 	}
 	
@@ -240,7 +240,7 @@ void UGMCAbilityEffect::PeriodTick()
 	if (AttributeDynamicCondition()) {
 		for (const FGMCAttributeModifier& AttributeModifier : EffectData.Modifiers)
 		{
-			OwnerAbilityComponent->ApplyAbilityEffectModifier(AttributeModifier, true);
+			OwnerAbilityComponent->ApplyAbilityEffectModifier(AttributeModifier, true, false, EffectData.SourceAbilityComponent);
 		}
 	}
 }
