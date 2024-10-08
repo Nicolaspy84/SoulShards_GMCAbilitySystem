@@ -114,6 +114,19 @@ void UGMCAbilityEffect::StartEffect()
 	}
 
 	UpdateState(EGMASEffectState::Started, true);
+
+	// Remove potential duplicate effect, only if EffectData.Delay > 0.
+	// If it's equal to 0, we need to wait for the effect to be registered by the ability system component, which will handle this part.
+	if (EffectData.Delay > 0)
+	{
+		for (TPair<int, UGMCAbilityEffect*>& Data : OwnerAbilityComponent->GetActiveEffects())
+		{
+			if (IsValid(Data.Value) && Data.Value != this && Data.Value->CurrentState == EGMASEffectState::Started && Data.Value->EffectData.EffectTag == EffectData.EffectTag)
+			{
+				Data.Value->EndEffect();
+			}
+		}
+	}
 }
 
 

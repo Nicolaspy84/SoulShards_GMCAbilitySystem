@@ -805,11 +805,15 @@ void UGMC_AbilitySystemComponent::TickActiveEffects(float DeltaTime)
 	// Clean expired effects
 	for (const int EffectID : CompletedActiveEffects)
 	{
-		// Notify client. Redundant.
-		if (HasAuthority()) {RPCClientEndEffect(EffectID);}
+		if (HasAuthority()) {
+			// Notify client. Redundant.
+			RPCClientEndEffect(EffectID);
+
+			// Only done on server as the property is replicated (changing it on client would cause the array to be in the wrong state).
+			ActiveEffectsData.RemoveAll([EffectID](const FGMCAbilityEffectData& EffectData) {return EffectData.EffectID == EffectID; });
+		}
 		
 		ActiveEffects.Remove(EffectID);
-		ActiveEffectsData.RemoveAll([EffectID](const FGMCAbilityEffectData& EffectData) {return EffectData.EffectID == EffectID;});
 	}
 }
 
@@ -1285,6 +1289,20 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(UGMCAbilityEf
 	}
 	
 	ActiveEffects.Add(Effect->EffectData.EffectID, Effect);
+
+	// Remove potential duplicate effects if this effect was started (ie it's ongoing).
+	if (Effect->CurrentState == EGMASEffectState::Started)
+	{
+		for (TPair<int, UGMCAbilityEffect*>& Data : GetActiveEffects())
+		{
+			if (IsValid(Data.Value) && Data.Value != Effect && Data.Value->CurrentState == EGMASEffectState::Started &&
+				Data.Value->EffectData.EffectTag == Effect->EffectData.EffectTag)
+			{
+				Data.Value->EndEffect();
+			}
+		}
+	}
+
 	return Effect;
 }
 
