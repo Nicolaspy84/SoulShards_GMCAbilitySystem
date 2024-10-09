@@ -1259,8 +1259,6 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(UGMCAbilityEf
 	// Force the component this is being applied to to be the owner
 	InitializationData.OwnerAbilityComponent = this;
 	
-	Effect->InitializeEffect(InitializationData);
-	
 	if (Effect->EffectData.EffectID == 0)
 	{
 		if (ActionTimer == 0)
@@ -1290,18 +1288,7 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(UGMCAbilityEf
 	
 	ActiveEffects.Add(Effect->EffectData.EffectID, Effect);
 
-	// Remove potential duplicate effects if this effect was started (ie it's ongoing).
-	if (Effect->CurrentState == EGMASEffectState::Started)
-	{
-		for (TPair<int, UGMCAbilityEffect*>& Data : GetActiveEffects())
-		{
-			if (IsValid(Data.Value) && Data.Value != Effect && Data.Value->CurrentState == EGMASEffectState::Started &&
-				Data.Value->EffectData.EffectTag == Effect->EffectData.EffectTag)
-			{
-				Data.Value->EndEffect();
-			}
-		}
-	}
+	Effect->InitializeEffect(InitializationData);
 
 	return Effect;
 }

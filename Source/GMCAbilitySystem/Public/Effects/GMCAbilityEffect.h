@@ -119,10 +119,17 @@ struct FGMCAbilityEffectData
 
 	/**
 	* Contains any relevant metadata for this effect.
-	* This includes data such as effect persistance, type (buff, debuff), effect debuffing etc.
+	* This includes data effect persistance, effect type (buff, debuff), and dispelling properties.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCABilitySystem")
 	FGameplayTagContainer EffectMetaData;
+
+	/**
+	* Used when dispelling effects.
+	* If there's at least one tag in here, only events which have at least one of those tags in their GrantedTags will be dispelled.
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCABilitySystem")
+	FGameplayTagContainer FilterDispelledEffectsWithGrantedTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer GrantedTags;
@@ -166,7 +173,8 @@ struct FGMCAbilityEffectData
 	bool IsValid() const
 	{
 		return GrantedTags != FGameplayTagContainer() || GrantedAbilities != FGameplayTagContainer() || Modifiers.Num() > 0
-				|| MustHaveTags != FGameplayTagContainer() || MustNotHaveTags != FGameplayTagContainer();
+				|| MustHaveTags != FGameplayTagContainer() || MustNotHaveTags != FGameplayTagContainer()
+				|| !EffectMetaData.IsEmpty() || !FilterDispelledEffectsWithGrantedTag.IsEmpty();
 	}
 
 	FString ToString() const{
