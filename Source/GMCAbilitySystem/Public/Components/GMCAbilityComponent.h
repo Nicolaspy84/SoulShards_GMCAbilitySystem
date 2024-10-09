@@ -54,7 +54,7 @@ class GMCABILITYSYSTEM_API UGMC_AbilitySystemComponent : public UGameplayTasksCo
 
 public:
 	// TEMP: this should move in GMCAbilityEffect, but we need some information from our own gameplay tags.
-	virtual void DispellAbilityEffects(const FGMCAbilityEffectData& DispellingEffectData) const {};
+	virtual void DispelAbilityEffects(const FGMCAbilityEffectData& DispellingEffectData) const {};
 
 	// Sets default values for this component's properties
 	UGMC_AbilitySystemComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());

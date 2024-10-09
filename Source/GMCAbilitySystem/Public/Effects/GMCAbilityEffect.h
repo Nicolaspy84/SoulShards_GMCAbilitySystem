@@ -231,6 +231,8 @@ public:
 	
 	void UpdateState(EGMASEffectState State, bool Force=false);
 
+	void CheckState();
+
 	virtual bool IsPeriodPaused();
 	
 	bool bCompleted;
@@ -269,8 +271,6 @@ protected:
 private:
 	// Used for calculating when to tick Period effects
 	float PrevPeriodMod = 0;
-	
-	void CheckState();
 
 public:
 	FString ToString() {

@@ -42,12 +42,6 @@ void UGMCAbilityEffect::InitializeEffect(FGMCAbilityEffectData InitializationDat
 	{
 		EffectData.EndTime = EffectData.StartTime + EffectData.Duration;
 	}
-
-	// Start Immediately
-	if (EffectData.Delay == 0)
-	{
-		StartEffect();
-	}
 }
 
 
@@ -68,7 +62,7 @@ void UGMCAbilityEffect::StartEffect()
 	AddTagsToOwner();
 	AddAbilitiesToOwner();
 	EndActiveAbilitiesFromOwner();
-	OwnerAbilityComponent->DispellAbilityEffects(EffectData);
+	OwnerAbilityComponent->DispelAbilityEffects(EffectData);
 
 	// Instant effects modify base value and end instantly
 	if (EffectData.bIsInstant)

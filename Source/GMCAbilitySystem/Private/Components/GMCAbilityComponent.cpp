@@ -1258,7 +1258,8 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(UGMCAbilityEf
 	
 	// Force the component this is being applied to to be the owner
 	InitializationData.OwnerAbilityComponent = this;
-	
+	Effect->InitializeEffect(InitializationData);
+
 	if (Effect->EffectData.EffectID == 0)
 	{
 		if (ActionTimer == 0)
@@ -1287,8 +1288,9 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(UGMCAbilityEf
 	}
 	
 	ActiveEffects.Add(Effect->EffectData.EffectID, Effect);
-
-	Effect->InitializeEffect(InitializationData);
+	
+	// We run this immediatly, as if the effect is instant, we want to run it right away.
+	Effect->CheckState();
 
 	return Effect;
 }
