@@ -810,7 +810,7 @@ void UGMC_AbilitySystemComponent::TickActiveEffects(float DeltaTime)
 			RPCClientEndEffect(EffectID);
 
 			// Only done on server as the property is replicated (changing it on client would cause the array to be in the wrong state).
-			ActiveEffectsData.RemoveAll([EffectID](const FGMCAbilityEffectData& EffectData) {return EffectData.EffectID == EffectID; });
+			ActiveEffectsData.RemoveAll([EffectID](const FActiveEffectsData& EffectData) {return EffectData.Data.EffectID == EffectID; });
 		}
 		
 		ActiveEffects.Remove(EffectID);
@@ -846,20 +846,20 @@ void UGMC_AbilitySystemComponent::TickActiveCooldowns(float DeltaTime)
 
 void UGMC_AbilitySystemComponent::OnRep_ActiveEffectsData()
 {
-	for (FGMCAbilityEffectData ActiveEffectData : ActiveEffectsData)
+	for (FActiveEffectsData ActiveEffectData : ActiveEffectsData)
 	{
-		if (ActiveEffectData.EffectID == 0) continue;
+		if (ActiveEffectData.Data.EffectID == 0 || !IsValid(ActiveEffectData.Class)) continue;
 		
-		if (!ProcessedEffectIDs.Contains(ActiveEffectData.EffectID))
+		if (!ProcessedEffectIDs.Contains(ActiveEffectData.Data.EffectID))
 		{
-			UGMCAbilityEffect* EffectCDO = DuplicateObject(UGMCAbilityEffect::StaticClass()->GetDefaultObject<UGMCAbilityEffect>(), this);
-			FGMCAbilityEffectData EffectData = ActiveEffectData;
+			UGMCAbilityEffect* EffectCDO = DuplicateObject(ActiveEffectData.Class->GetDefaultObject<UGMCAbilityEffect>(), this);
+			FGMCAbilityEffectData EffectData = ActiveEffectData.Data;
 			ApplyAbilityEffect(EffectCDO, EffectData);
 			ProcessedEffectIDs.Add(EffectData.EffectID, true);
-			UE_LOG(LogGMCAbilitySystem, VeryVerbose, TEXT("Replicated Effect: %d"), ActiveEffectData.EffectID);
+			UE_LOG(LogGMCAbilitySystem, VeryVerbose, TEXT("Replicated Effect: %d"), ActiveEffectData.Data.EffectID);
 		}
 		
-		ProcessedEffectIDs[ActiveEffectData.EffectID] = true;
+		ProcessedEffectIDs[ActiveEffectData.Data.EffectID] = true;
 	}
 }
 
@@ -874,21 +874,24 @@ void UGMC_AbilitySystemComponent::CheckRemovedEffects()
 		// it means the server removed it
 		if (!ProcessedEffectIDs[Effect.Key]){return;}
 		
-		if (!ActiveEffectsData.ContainsByPredicate([Effect](const FGMCAbilityEffectData& EffectData) {return EffectData.EffectID == Effect.Key;}))
+		if (!ActiveEffectsData.ContainsByPredicate([Effect](const FActiveEffectsData& EffectData) {return EffectData.Data.EffectID == Effect.Key;}))
 		{
 			RemoveActiveAbilityEffect(Effect.Value);
 		}
 	}
 }
 
-void UGMC_AbilitySystemComponent::AddPendingEffectApplications(FGMCOuterApplicationWrapper& Wrapper) {
+void UGMC_AbilitySystemComponent::AddPendingEffectApplications(FGMCOuterApplicationWrapper& Wrapper, float ClientGraceTime) {
 	check(HasAuthority())
 
-	Wrapper.ClientGraceTimeRemaining = 1.f;
+	Wrapper.ClientGraceTimeRemaining = ClientGraceTime;
 	Wrapper.LateApplicationID = GenerateLateApplicationID();
 
 	PendingApplicationServer.Add(Wrapper);
-	RPCClientAddPendingEffectApplication(Wrapper);
+	if (ClientGraceTime > 0.f)
+	{
+		RPCClientAddPendingEffectApplication(Wrapper);
+	}
 }
 
 
@@ -1225,7 +1228,7 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(TSubclassOf<U
 	if (bOuterActivation) {
 		if (HasAuthority()) {
 			FGMCOuterApplicationWrapper Wrapper = FGMCOuterApplicationWrapper::Make<FGMCOuterEffectAdd>(Effect, InitializationData);
-			AddPendingEffectApplications(Wrapper);
+			AddPendingEffectApplications(Wrapper, InitializationData.ClientGraceTime);
 		}
 		return nullptr;
 	}
@@ -1280,7 +1283,7 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(UGMCAbilityEf
 	// This is Replicated, so only server needs to manage it
 	if (HasAuthority())
 	{
-		ActiveEffectsData.Push(Effect->EffectData);
+		ActiveEffectsData.Push(FActiveEffectsData(Effect->EffectData, Effect->GetClass()));
 	}
 	else
 	{
@@ -1337,7 +1340,7 @@ int32 UGMC_AbilitySystemComponent::RemoveEffectByTag(FGameplayTag InEffectTag, i
 			}
 			
 			FGMCOuterApplicationWrapper Wrapper = FGMCOuterApplicationWrapper::Make<FGMCOuterEffectRemove>(EffectIDsToRemove);
-			AddPendingEffectApplications(Wrapper);
+			AddPendingEffectApplications(Wrapper, 0.3f);
 		}
 		return 0;
 	}
@@ -1367,7 +1370,7 @@ bool UGMC_AbilitySystemComponent::RemoveEffectById(TArray<int> Ids, bool bOuterA
 	if (bOuterActivation) {
 		if (HasAuthority()) {
 			FGMCOuterApplicationWrapper Wrapper = FGMCOuterApplicationWrapper::Make<FGMCOuterEffectRemove>(Ids);
-			AddPendingEffectApplications(Wrapper);
+			AddPendingEffectApplications(Wrapper, 0.3f);
 		}
 		return true;
 	}
@@ -1507,8 +1510,8 @@ FString UGMC_AbilitySystemComponent::GetAllAttributesString() const{
 
 FString UGMC_AbilitySystemComponent::GetActiveEffectsDataString() const{
 	FString FinalString = TEXT("\n");
-	for(const FGMCAbilityEffectData& ActiveEffectData : ActiveEffectsData){
-		FinalString += ActiveEffectData.ToString() + TEXT("\n");
+	for(const FActiveEffectsData& ActiveEffectData : ActiveEffectsData){
+		FinalString += ActiveEffectData.Data.ToString() + TEXT("\n");
 	}
 	return FinalString;
 }

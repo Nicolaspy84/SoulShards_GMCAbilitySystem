@@ -202,6 +202,7 @@ public:
 	virtual void InitializeEffect(FGMCAbilityEffectData InitializationData);
 	
 	virtual void EndEffect();
+	virtual void EndEffect_Implementation() {};
 
 	virtual void BeginDestroy() override;
 	
@@ -228,6 +229,7 @@ public:
 	bool AttributeDynamicCondition() const;
 	
 	virtual void PeriodTick();
+	virtual void PeriodTick_Implementation() {};
 	
 	void UpdateState(EGMASEffectState State, bool Force=false);
 
@@ -265,6 +267,7 @@ protected:
 
 	// Apply the things that should happen as soon as an effect starts. Tags, instant effects, etc.
 	virtual void StartEffect();
+	virtual void StartEffect_Implementation() {};
 
 	bool bHasStarted;
 

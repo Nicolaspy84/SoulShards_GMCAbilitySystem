@@ -29,7 +29,29 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAncillaryTick, float, DeltaTime);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActiveTagsChanged, FGameplayTagContainer, AddedTags, FGameplayTagContainer, RemovedTags);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FGameplayTagFilteredMulticastDelegate, const FGameplayTagContainer&, const FGameplayTagContainer&);
 
+USTRUCT()
+struct FActiveEffectsData
+{
+	GENERATED_BODY()
 
+	UPROPERTY()
+	FGMCAbilityEffectData Data;
+
+	UPROPERTY()
+	TSubclassOf<UGMCAbilityEffect> Class;
+
+	FActiveEffectsData()
+	{
+		Data = FGMCAbilityEffectData();
+		Class = UGMCAbilityEffect::StaticClass();
+	}
+
+	FActiveEffectsData(const FGMCAbilityEffectData& TargetData, TSubclassOf<UGMCAbilityEffect> TargetClass)
+	{
+		Data = TargetData;
+		Class = TargetClass;
+	}
+};
 
 USTRUCT()
 struct FEffectStatePrediction
@@ -516,7 +538,7 @@ private:
 	// then prediction is already out the window
 
 	UPROPERTY(ReplicatedUsing = OnRep_ActiveEffectsData)
-	TArray<FGMCAbilityEffectData> ActiveEffectsData;
+	TArray<FActiveEffectsData> ActiveEffectsData;
 
 	// Max time a client will predict an effect without it being confirmed by the server before cancelling
 	float ClientEffectApplicationTimeout = 1.f;
@@ -543,7 +565,7 @@ private:
 	// Binded Used for acknowledge server initiated ability/effect
 	FInstancedStruct AcknowledgeId = FInstancedStruct::Make(FGMCAcknowledgeId{});
 
-	void AddPendingEffectApplications(FGMCOuterApplicationWrapper& Wrapper);
+	void AddPendingEffectApplications(FGMCOuterApplicationWrapper& Wrapper, float ClientGraceTime);
 	// Let the client know that the server ask for an external effect application
 	UFUNCTION(Client, Reliable)
 	void RPCClientAddPendingEffectApplication(FGMCOuterApplicationWrapper Wrapper);

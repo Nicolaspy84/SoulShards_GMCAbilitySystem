@@ -96,6 +96,8 @@ void UGMCAbilityEffect::StartEffect()
 		}
 	}
 
+	StartEffect_Implementation();
+
 	// Tick period at start
 	if (EffectData.bPeriodTickAtStart && EffectData.Period > 0)
 	{
@@ -172,6 +174,7 @@ void UGMCAbilityEffect::EndEffect()
 	
 	RemoveTagsFromOwner();
 	RemoveAbilitiesFromOwner();
+	EndEffect_Implementation();
 }
 
 
@@ -246,6 +249,7 @@ void UGMCAbilityEffect::PeriodTick()
 			OwnerAbilityComponent->ApplyAbilityEffectModifier(AttributeModifier, true, false, EffectData.SourceAbilityComponent);
 		}
 	}
+	PeriodTick_Implementation();
 }
 
 void UGMCAbilityEffect::UpdateState(EGMASEffectState State, bool Force)
