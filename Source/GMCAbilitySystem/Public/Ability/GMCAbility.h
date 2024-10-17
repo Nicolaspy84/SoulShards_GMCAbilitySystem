@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "GameplayTagContainer.h"
 #include "GMCAbilityData.h"
 #include "GMCAbilitySystem.h"
@@ -117,24 +117,24 @@ public:
 	FGameplayTag AbilityTag;
 
 	// An Effect that modifies attributes when the ability is activated
-	UPROPERTY(EditAnywhere, Category = "GMCAbilitySystem")
+	UPROPERTY()
 	TSubclassOf<UGMCAbilityEffect> AbilityCost;
 
 	// How long in seconds ability should go on cooldown when activated
 	// Requires AbilityTag to be set
-	UPROPERTY(EditAnywhere, Category = "GMCAbilitySystem")
+	UPROPERTY()
 	float CooldownTime;
 
 	// If true, the ability will apply the Cooldown when activated
 	// If false, the ability will NOT apply the Cooldown when the ability begins
 	// You can still apply the cooldown manually with CommitAbilityCooldown or CommitAbilityCostAndCooldown
-	UPROPERTY(EditAnywhere, Category = "GMCAbilitySystem")
+	UPROPERTY()
 	bool bApplyCooldownAtAbilityBegin{true};
 
 	// If true, more than one instance of this ability can be active at once. If false, the actual activation (but not
 	// the queuing) of an ability will fail if the ability already is active.
-	UPROPERTY(EditAnywhere, Category = "GMCAbilitySystem")
-	bool bAllowMultipleInstances {false};
+	UPROPERTY()
+	bool bAllowMultipleInstances {true};
 	
 	// Check to see if affected attributes in the AbilityCost would still be >= 0 after committing the cost
 	UFUNCTION(BlueprintPure, Category = "GMCAbilitySystem")
@@ -210,7 +210,7 @@ public:
 	 * Should be set to false for actions that should not be replayed on mispredictions. i.e. firing a weapon
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GMCAbilitySystem")
-	bool bActivateOnMovementTick = true; 
+	bool bActivateOnMovementTick = false; 
 
 	UFUNCTION()
 	void ServerConfirm();

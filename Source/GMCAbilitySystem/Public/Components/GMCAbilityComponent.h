@@ -206,7 +206,7 @@ public:
 	virtual void SetCooldownForAbility(const FGameplayTag AbilityTag, float CooldownTime);
 
 	UFUNCTION(BlueprintPure, Category = "GMCAbilitySystem")
-	float GetCooldownForAbility(const FGameplayTag AbilityTag) const;
+	virtual float GetCooldownForAbility(const FGameplayTag AbilityTag) const;
 	
 	UFUNCTION(BlueprintPure, Category = "GMCAbilitySystem")
 	float GetMaxCooldownForAbility(TSubclassOf<UGMCAbility> Ability) const;
