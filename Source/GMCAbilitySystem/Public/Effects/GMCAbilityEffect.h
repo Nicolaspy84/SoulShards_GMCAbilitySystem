@@ -27,6 +27,14 @@ enum class EGMASEffectState : uint8
 	Ended  // Lasts forever
 };
 
+UENUM(BlueprintType)
+enum class EGMASEffectForceType : uint8
+{
+	None,  // No force to apply.
+	KnockDown, // Apply a knock down effect.
+	PushBack  // Apply a push back effect.
+};
+
 // Container for exposing the attribute modifier to blueprints
 UCLASS()
 class GMCABILITYSYSTEM_API UGMCAttributeModifierContainer : public UObject
@@ -163,6 +171,15 @@ struct FGMCAbilityEffectData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	TArray<FGMCAttributeModifier> Modifiers;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	EGMASEffectForceType ForceType = EGMASEffectForceType::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	FVector ForceDirection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	float ForceAmount;
 	
 	inline bool operator==(const FGMCAbilityEffectData& Other) const
 	{
