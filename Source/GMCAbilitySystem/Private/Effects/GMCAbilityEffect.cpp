@@ -60,7 +60,8 @@ void UGMCAbilityEffect::StartEffect()
 	bHasStarted = true;
 	
 	AddTagsToOwner();
-	AddAbilitiesToOwner();
+	AddAbilitiesToOwner(EffectData.GrantedAbilities);
+	RemoveAbilitiesFromOwner(EffectData.RemovedAbilities);
 	EndActiveAbilitiesFromOwner();
 	OwnerAbilityComponent->DispelAbilityEffects(EffectData);
 
@@ -172,8 +173,13 @@ void UGMCAbilityEffect::EndEffect()
 		}
 	}
 	
-	RemoveTagsFromOwner();
-	RemoveAbilitiesFromOwner();
+	// We only revert this if the effect was not instant.
+	if (!EffectData.bIsInstant)
+	{
+		RemoveTagsFromOwner();
+		AddAbilitiesToOwner(EffectData.RemovedAbilities);
+		RemoveAbilitiesFromOwner(EffectData.GrantedAbilities);
+	}
 	EndEffect_Implementation();
 }
 
@@ -299,33 +305,17 @@ void UGMCAbilityEffect::RemoveTagsFromOwner(bool bPreserveOnMultipleInstances)
 	}
 }
 
-void UGMCAbilityEffect::AddAbilitiesToOwner()
+void UGMCAbilityEffect::AddAbilitiesToOwner(const FGameplayTagContainer& TagsToAdd)
 {
-	for (const FGameplayTag Tag : EffectData.GrantedAbilities)
+	for (const FGameplayTag Tag : TagsToAdd)
 	{
 		OwnerAbilityComponent->GrantAbilityByTag(Tag);
 	}
 }
 
-void UGMCAbilityEffect::RemoveAbilitiesFromOwner()
+void UGMCAbilityEffect::RemoveAbilitiesFromOwner(const FGameplayTagContainer& TagsToRemove)
 {
-	if (EffectData.GrantedAbilities.Num() == 0)
-	{
-		return;
-	}
-
-	// We only remove abilities which are not currently granted by other ability effects
-	FGameplayTagContainer AbilitiesToRemove = EffectData.GrantedAbilities;
-	for (const TPair<int, UGMCAbilityEffect*> Effect : OwnerAbilityComponent->GetActiveEffects())
-	{
-		if (IsValid(Effect.Value) && Effect.Value->CurrentState == EGMASEffectState::Started
-								  && Effect.Value->EffectData.GrantedAbilities.HasAnyExact(AbilitiesToRemove))
-		{
-			AbilitiesToRemove.RemoveTags(Effect.Value->EffectData.GrantedAbilities);
-		}
-	}
-
-	for (const FGameplayTag Tag : AbilitiesToRemove)
+	for (const FGameplayTag Tag : TagsToRemove)
 	{
 		OwnerAbilityComponent->RemoveGrantedAbilityByTag(Tag);
 	}

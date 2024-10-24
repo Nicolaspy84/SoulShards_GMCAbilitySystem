@@ -161,6 +161,9 @@ struct FGMCAbilityEffectData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer GrantedAbilities;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	FGameplayTagContainer RemovedAbilities;
+
 	// If tag is present, periodic effect will not tick. Duration is not affected.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer PausePeriodicEffect;
@@ -189,7 +192,8 @@ struct FGMCAbilityEffectData
 
 	bool IsValid() const
 	{
-		return GrantedTags != FGameplayTagContainer() || GrantedAbilities != FGameplayTagContainer() || Modifiers.Num() > 0
+		return GrantedTags != FGameplayTagContainer() || GrantedAbilities != FGameplayTagContainer()
+				|| RemovedAbilities != FGameplayTagContainer() || Modifiers.Num() > 0
 				|| MustHaveTags != FGameplayTagContainer() || MustNotHaveTags != FGameplayTagContainer()
 				|| !EffectMetaData.IsEmpty() || !FilterDispelledEffectsWithGrantedTag.IsEmpty();
 	}
@@ -273,8 +277,8 @@ protected:
 	// bPreserveOnMultipleInstances: If true, will not remove tags if there are multiple instances of the same effect
 	void RemoveTagsFromOwner(bool bPreserveOnMultipleInstances = true);
 
-	void AddAbilitiesToOwner();
-	void RemoveAbilitiesFromOwner();
+	void AddAbilitiesToOwner(const FGameplayTagContainer& TagsToAdd);
+	void RemoveAbilitiesFromOwner(const FGameplayTagContainer& TagsToRemove);
 	void EndActiveAbilitiesFromOwner();
 
 	// Does the owner have any of the tags from the container?
