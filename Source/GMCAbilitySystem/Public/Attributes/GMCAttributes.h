@@ -102,9 +102,13 @@ struct GMCABILITYSYSTEM_API FAttribute : public FFastArraySerializerItem
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	mutable float BaseValue{0};
 
-	// Attribute.* 
+	// Attribute tag.
 	UPROPERTY(EditDefaultsOnly, Category="Attribute", meta = (Categories="Attribute"))
 	FGameplayTag Tag{FGameplayTag::EmptyTag};
+
+	// Attribute tag which should be used as a base for the regeneration mechanic. Leave it empty for no regen.
+	UPROPERTY(EditDefaultsOnly, Category = "Attribute", meta = (Categories = "Attribute"))
+	FGameplayTag RegenAttributeTag{ FGameplayTag::EmptyTag };
 
 	// Whether this should be bound over GMC or not.
 	// NOTE: If you don't bind it, you can't use it for any kind of prediction.

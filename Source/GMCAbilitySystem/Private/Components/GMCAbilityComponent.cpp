@@ -630,6 +630,7 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 		for(const FAttributeData AttributeData : AttributeDataAsset->AttributeData){
 			FAttribute NewAttribute;
 			NewAttribute.Tag = AttributeData.AttributeTag;
+			NewAttribute.RegenAttributeTag = AttributeData.RegenAttributeTag;
 			NewAttribute.BaseValue = AttributeData.DefaultValue;
 			NewAttribute.Clamp = AttributeData.Clamp;
 			NewAttribute.Clamp.AbilityComponent = this;

@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,6 +16,10 @@ struct FAttributeData{
 	/** i.e. Attribute.Health */
 	UPROPERTY(EditDefaultsOnly, meta=(Categories="Attribute"), Category = "GMCAbilitySystem")
 	FGameplayTag AttributeTag;
+
+	// Attribute tag which should be used as a base for the regeneration mechanic. Leave it empty for no regen.
+	UPROPERTY(EditDefaultsOnly, Category = "Attribute", meta = (Categories = "Attribute"))
+	FGameplayTag RegenAttributeTag{ FGameplayTag::EmptyTag };
 
 	UPROPERTY(EditDefaultsOnly, Category = "GMCAbilitySystem")
 	float DefaultValue = 0.f;
