@@ -368,6 +368,7 @@ bool UGMC_AbilitySystemComponent::TryActivateAbility(const TSubclassOf<UGMCAbili
 		// Enforce only one active instance of the ability at a time.
 		if (GetActiveAbilityCount(ActivatedAbility) > 0) {
 			UE_LOG(LogGMCAbilitySystem, VeryVerbose, TEXT("Ability Activation for %s Stopped (Already Instanced)"), *GetNameSafe(ActivatedAbility));
+			OnAbilityTriedActivation.Broadcast(AbilityCDO->AbilityTag, false);
 			return false;
 		}
 	}
@@ -375,6 +376,7 @@ bool UGMC_AbilitySystemComponent::TryActivateAbility(const TSubclassOf<UGMCAbili
 	// Check Activation Tags
 	if (!CheckActivationTags(AbilityCDO)){
 		UE_LOG(LogGMCAbilitySystem, Verbose, TEXT("Ability Activation for %s Stopped By Tags"), *GetNameSafe(ActivatedAbility));
+		OnAbilityTriedActivation.Broadcast(AbilityCDO->AbilityTag, false);
 		return false;
 	}
 
@@ -385,6 +387,7 @@ bool UGMC_AbilitySystemComponent::TryActivateAbility(const TSubclassOf<UGMCAbili
 	}
 	
 	UE_LOG(LogGMCAbilitySystem, VeryVerbose, TEXT("[Server: %hhd] Generated Ability Activation ID: %d"), HasAuthority(), AbilityID);
+	OnAbilityTriedActivation.Broadcast(AbilityCDO->AbilityTag, true);
 	
 	UGMCAbility* Ability = NewObject<UGMCAbility>(this, ActivatedAbility);
 	Ability->AbilityData = AbilityData;

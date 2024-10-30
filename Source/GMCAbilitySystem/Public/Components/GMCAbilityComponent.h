@@ -29,6 +29,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAncillaryTick, float, DeltaTime);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActiveTagsChanged, FGameplayTagContainer, AddedTags, FGameplayTagContainer, RemovedTags);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FGameplayTagFilteredMulticastDelegate, const FGameplayTagContainer&, const FGameplayTagContainer&);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityTriedActivation, FGameplayTag, AbilityTag, bool, bSuccess);
+
 USTRUCT()
 struct FActiveEffectsData
 {
@@ -174,6 +176,10 @@ public:
 	
 	// Do not call directly on client, go through QueueAbility. Can be used to call server-side abilities (like AI).
 	bool TryActivateAbility(TSubclassOf<UGMCAbility> ActivatedAbility, const UInputAction* InputAction = nullptr);
+
+	// Called when an ability activation was tried, even if it was not a success. Always called before the ability begins.
+	UPROPERTY(BlueprintAssignable, Category = "Ability System|Abilities")
+	FOnAbilityTriedActivation OnAbilityTriedActivation;
 	
 	// Queue an ability to be executed
 	virtual void QueueAbility(FGameplayTag InputTag, const UInputAction* InputAction = nullptr);
