@@ -183,6 +183,9 @@ struct FGMCAbilityEffectData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	float ForceAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	float ThreatAmount;
 	
 	inline bool operator==(const FGMCAbilityEffectData& Other) const
 	{
@@ -195,7 +198,8 @@ struct FGMCAbilityEffectData
 		return GrantedTags != FGameplayTagContainer() || GrantedAbilities != FGameplayTagContainer()
 				|| RemovedAbilities != FGameplayTagContainer() || Modifiers.Num() > 0
 				|| MustHaveTags != FGameplayTagContainer() || MustNotHaveTags != FGameplayTagContainer()
-				|| !EffectMetaData.IsEmpty() || !FilterDispelledEffectsWithGrantedTag.IsEmpty();
+				|| !EffectMetaData.IsEmpty() || !FilterDispelledEffectsWithGrantedTag.IsEmpty()
+				|| ForceType != EGMASEffectForceType::None || ThreatAmount != 0.f;
 	}
 
 	FString ToString() const{
