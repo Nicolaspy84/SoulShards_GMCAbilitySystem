@@ -388,6 +388,8 @@ bool UGMC_AbilitySystemComponent::TryActivateAbility(const TSubclassOf<UGMCAbili
 	
 	UE_LOG(LogGMCAbilitySystem, VeryVerbose, TEXT("[Server: %hhd] Generated Ability Activation ID: %d"), HasAuthority(), AbilityID);
 	OnAbilityTriedActivation.Broadcast(AbilityCDO->AbilityTag, true);
+
+	EndAbilitiesOnSameChannel(AbilityCDO);
 	
 	UGMCAbility* Ability = NewObject<UGMCAbility>(this, ActivatedAbility);
 	Ability->AbilityData = AbilityData;

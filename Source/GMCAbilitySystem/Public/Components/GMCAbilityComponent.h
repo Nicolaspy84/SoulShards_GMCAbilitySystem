@@ -180,6 +180,9 @@ public:
 	// Called when an ability activation was tried, even if it was not a success. Always called before the ability begins.
 	UPROPERTY(BlueprintAssignable, Category = "Ability System|Abilities")
 	FOnAbilityTriedActivation OnAbilityTriedActivation;
+
+	// Implement the logic in the child object.
+	virtual void EndAbilitiesOnSameChannel(const UGMCAbility* AbilityCDO) {};
 	
 	// Queue an ability to be executed
 	virtual void QueueAbility(FGameplayTag InputTag, const UInputAction* InputAction = nullptr);
