@@ -380,6 +380,13 @@ bool UGMC_AbilitySystemComponent::TryActivateAbility(const TSubclassOf<UGMCAbili
 		return false;
 	}
 
+	if (!CheckPreventAbilityRestart(AbilityCDO->AbilityTag))
+	{
+		UE_LOG(LogGMCAbilitySystem, Verbose, TEXT("Ability Activation for %s Stopped (Prevent Ability Restart)"), *GetNameSafe(ActivatedAbility));
+		OnAbilityTriedActivation.Broadcast(AbilityCDO->AbilityTag, false);
+		return false;
+	}
+
 	// If multiple abilities are activated on the same frame, add 1 to the ID
 	// This should never actually happen as abilities get queued
 	while (ActiveAbilities.Contains(AbilityID)){

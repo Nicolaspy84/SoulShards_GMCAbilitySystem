@@ -182,6 +182,9 @@ public:
 	FOnAbilityTriedActivation OnAbilityTriedActivation;
 
 	// Implement the logic in the child object.
+	virtual bool CheckPreventAbilityRestart(const FGameplayTag& AbilityTag) const { return true; };
+
+	// Implement the logic in the child object.
 	virtual void EndAbilitiesOnSameChannel(const UGMCAbility* AbilityCDO) {};
 	
 	// Queue an ability to be executed
