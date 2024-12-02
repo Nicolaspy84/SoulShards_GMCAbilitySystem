@@ -1,7 +1,8 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
-#include "InstancedStruct.h"
+#include "StructUtils/InstancedStruct.h"
+#include "Effects/GMCAbilityEffect.h"
 #include "GMCAbilityOuterApplication.generated.h"
 
 USTRUCT()
@@ -50,7 +51,7 @@ struct FGMCOuterApplicationWrapper {
 
 	UPROPERTY()
 	int LateApplicationID = 0;
-	
+
 	float ClientGraceTimeRemaining = 0.f;
 
 	template<typename T, typename... Args>
