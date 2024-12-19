@@ -479,12 +479,15 @@ protected:
 
 	FGameplayAttributeChangedNative NativeAttributeChangeDelegate;
 
+	void AddAbilityMapData(const FAbilityMapData& AbilityMapData);
+
 private:
 
 	bool bStartingEffectsApplied = false;
 	
-	// Array of data objects to initialize the component's ability map
-	UPROPERTY(EditDefaultsOnly, Category="Ability")
+	// Array of data objects to initialize the component's ability map.
+	// Disabled as we fill it automatically now.
+	UPROPERTY()
 	TArray<TObjectPtr<UGMCAbilityMapData>> AbilityMaps;
 
 	// List of filtered tag delegates to call when tags change.
@@ -492,7 +495,6 @@ private:
 	
 	// Get the map from the data asset and apply that to the component's map
 	void InitializeAbilityMap();
-	void AddAbilityMapData(const FAbilityMapData& AbilityMapData);
 	void RemoveAbilityMapData(const FAbilityMapData& AbilityMapData);
 
 	// Add the starting ability tags to GrantedAbilities at start
