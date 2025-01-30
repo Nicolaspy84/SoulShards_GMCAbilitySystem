@@ -72,6 +72,7 @@ void UGMCAbilityEffect::StartEffect()
 		{
 			OwnerAbilityComponent->ApplyAbilityEffectModifier(Modifier, true, false, EffectData.SourceAbilityComponent);
 		}
+		StartEffect_Implementation();
 		EndEffect();
 		return;
 	}
