@@ -179,13 +179,13 @@ struct FGMCAbilityEffectData
 	EGMASEffectForceType ForceType = EGMASEffectForceType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	FVector ForceDirection;
+	FVector ForceDirection = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	float ForceAmount;
+	float ForceAmount = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	float ThreatAmount;
+	float ThreatAmount = 0.f;
 	
 	inline bool operator==(const FGMCAbilityEffectData& Other) const
 	{
