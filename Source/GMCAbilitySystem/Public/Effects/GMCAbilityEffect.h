@@ -164,6 +164,13 @@ struct FGMCAbilityEffectData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer RemovedAbilities;
 
+	/**
+	* Every ability here will be blocked for the duration of the effect (charges will be set 0 and cooldown will be paused and reset).
+	* If the effect is instant, the ability will still be blocked for a frame (cooldown and charges reset).
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	FGameplayTagContainer BlockedAbilities;
+
 	// If tag is present, periodic effect will not tick. Duration is not affected.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer PausePeriodicEffect;
@@ -196,7 +203,7 @@ struct FGMCAbilityEffectData
 	bool IsValid() const
 	{
 		return GrantedTags != FGameplayTagContainer() || GrantedAbilities != FGameplayTagContainer()
-				|| RemovedAbilities != FGameplayTagContainer() || Modifiers.Num() > 0
+				|| RemovedAbilities != FGameplayTagContainer() || BlockedAbilities != FGameplayTagContainer() || Modifiers.Num() > 0
 				|| MustHaveTags != FGameplayTagContainer() || MustNotHaveTags != FGameplayTagContainer()
 				|| !EffectMetaData.IsEmpty() || !FilterDispelledEffectsWithGrantedTag.IsEmpty()
 				|| ForceType != EGMASEffectForceType::None || ThreatAmount != 0.f;
