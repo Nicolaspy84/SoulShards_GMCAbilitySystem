@@ -121,11 +121,16 @@ struct GMCABILITYSYSTEM_API FAttribute : public FFastArraySerializerItem
 	FAttributeClamp Clamp{};
 
 	/**
-	* Replicated ability system pointer used by clients to populateOnAttributeValueChangedDelegateMap.
-	* Only valid when bIsGMCBound is false.
-	*/
+	 * Replicated ability system pointer used by clients to populateOnAttributeValueChangedDelegateMap.
+	 * Only valid when bIsGMCBound is false.
+	 */
 	UPROPERTY()
 	UGMC_AbilitySystemComponent* AbilitySystem = nullptr;
+
+	/**
+	 * Container of all attributes which are clamped (min and/or max) by this attribute.
+	 */
+	FGameplayTagContainer AttributesClampedBySelf = FGameplayTagContainer();
 
 	void PostReplicatedAdd(const FGMCUnboundAttributeSet& InArraySerializer);
 	void PostReplicatedChange(const struct FGMCUnboundAttributeSet& InArraySerializer);

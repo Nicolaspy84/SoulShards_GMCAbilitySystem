@@ -631,13 +631,20 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 {
 	BoundAttributes = FGMCAttributeSet();
 	UnBoundAttributes = FGMCUnboundAttributeSet();
-	if(AttributeDataAssets.IsEmpty()) return;
+	if (AttributeDataAssets.IsEmpty()) {
+		return;
+	}
+
+	// The key is the attribute which clamps, the value is the attribute being clamped.
+	TMap<FGameplayTag, FGameplayTagContainer> AllAttributeClamps;
 
 	// Loop through each of the data assets inputted into the component to create new attributes.
 	for(UGMCAttributesData* AttributeDataAsset : AttributeDataAssets){
 
 		// Avoid crashing in an editor preview if we're actually editing the ability component's attribute table.
-		if (!AttributeDataAsset) continue;
+		if (!AttributeDataAsset) {
+			continue;
+		}
 		
 		for(const FAttributeData AttributeData : AttributeDataAsset->AttributeData){
 			FAttribute NewAttribute;
@@ -648,6 +655,32 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 			NewAttribute.Clamp.AbilityComponent = this;
 			NewAttribute.bIsGMCBound = AttributeData.bGMCBound;
 			NewAttribute.Init();
+
+			// Populate clamping.
+			if (NewAttribute.Clamp.MaxAttributeTag.IsValid())
+			{
+				FGameplayTagContainer* ExistingContainer = AllAttributeClamps.Find(NewAttribute.Clamp.MaxAttributeTag);
+				if (ExistingContainer)
+				{
+					ExistingContainer->AddTag(NewAttribute.Tag);
+				}
+				else
+				{
+					AllAttributeClamps.Add(NewAttribute.Clamp.MaxAttributeTag, FGameplayTagContainer(NewAttribute.Tag));
+				}
+			}
+			if (NewAttribute.Clamp.MinAttributeTag.IsValid())
+			{
+				FGameplayTagContainer* ExistingContainer = AllAttributeClamps.Find(NewAttribute.Clamp.MinAttributeTag);
+				if (ExistingContainer)
+				{
+					ExistingContainer->AddTag(NewAttribute.Tag);
+				}
+				else
+				{
+					AllAttributeClamps.Add(NewAttribute.Clamp.MinAttributeTag, FGameplayTagContainer(NewAttribute.Tag));
+				}
+			}
 
 			OnAttributeValueChangedDelegateMap.Add(NewAttribute.Tag, FOnAttributeValueChanged());
 			
@@ -669,17 +702,28 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 		}
 	}
 
-	// After all attributes are initialized, calc their values which will primarily apply their Clamps
-	
-	for (const FAttribute& Attribute : BoundAttributes.Attributes)
+	// After all attributes are initialized, calc their values which will primarily apply their Clamps.
+	// We also update foreign clamps references.
+	for (FAttribute& Attribute : BoundAttributes.Attributes)
 	{
 		Attribute.CalculateValue();
+		FGameplayTagContainer* AttributesClamped = AllAttributeClamps.Find(Attribute.Tag);
+		if (AttributesClamped)
+		{
+			Attribute.AttributesClampedBySelf = *AttributesClamped;
+		}
 	}
 
-	// We need to be non-const to ensure we can mark the item dirty.
+	// After all attributes are initialized, calc their values which will primarily apply their Clamps.
+	// We also update foreign clamps references.
 	for (FAttribute& Attribute : UnBoundAttributes.Items)
 	{
 		Attribute.CalculateValue();
+		FGameplayTagContainer* AttributesClamped = AllAttributeClamps.Find(Attribute.Tag);
+		if (AttributesClamped)
+		{
+			Attribute.AttributesClampedBySelf = *AttributesClamped;
+		}
 		UnBoundAttributes.MarkItemDirty(Attribute);
 	}
 	UnBoundAttributes.MarkArrayDirty();
@@ -1583,6 +1627,19 @@ void UGMC_AbilitySystemComponent::ApplyAbilityEffectModifier(FGMCAttributeModifi
 		UnBoundAttributes.MarkAttributeDirty(*AffectedAttribute);
 		if (!AffectedAttribute->bIsGMCBound) {
 			OnRep_UnBoundAttributes();
+		}
+
+		// Finally, check all AttributesClampedBySelf, and update them if needed.
+		for (const FGameplayTag& AttributeClampedBySelf : AffectedAttribute->AttributesClampedBySelf)
+		{
+			const FAttribute* ClampedAttribute = GetAttributeByTag(AttributeClampedBySelf);
+			// We know that we need to update the value if the clamp is different from its current value.
+			if (ClampedAttribute && ClampedAttribute->Value != ClampedAttribute->Clamp.ClampValue(ClampedAttribute->Value))
+			{
+				FGMCAttributeModifier ClampedAttributeModifier;
+				ClampedAttributeModifier.AttributeTag = AttributeClampedBySelf;
+				ApplyAbilityEffectModifier(ClampedAttributeModifier, true, false, this);
+			}
 		}
 	}
 }
