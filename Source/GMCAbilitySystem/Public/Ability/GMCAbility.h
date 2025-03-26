@@ -113,7 +113,7 @@ public:
 	void SetOwnerJustTeleported(bool bValue);
 
 	// Tag to identify this ability. Required for setting cooldowns.
-	UPROPERTY(EditAnywhere, meta=(Categories="Ability"), Category = "GMCAbilitySystem")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="Ability"), Category = "GMCAbilitySystem")
 	FGameplayTag AbilityTag;
 
 	// An Effect that modifies attributes when the ability is activated
