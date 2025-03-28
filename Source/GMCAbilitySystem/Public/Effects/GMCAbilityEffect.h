@@ -186,7 +186,10 @@ struct FGMCAbilityEffectData
 	EGMASEffectForceType ForceType = EGMASEffectForceType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	FVector ForceDirection = FVector::ZeroVector;
+	FVector ForceSourceLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	float ForceAngle = 45.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	float ForceAmount = 0.f;
