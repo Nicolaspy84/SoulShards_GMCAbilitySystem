@@ -257,6 +257,12 @@ public:
 	void OnRep_UnBoundAttributes();
 
 	/**
+	* Function which can be overriden to prevent an effect from being applied.
+	* Override this function if you have gameplay logic which should prevent some effects from being applied.
+	*/
+	virtual bool CanApplyAbilityEffect(UGMCAbilityEffect* Effect) { return true; };
+
+	/**
 	 * Applies an effect to the Ability Component
 	 *
 	 * @param	Effect		        Effect to apply

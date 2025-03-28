@@ -1321,6 +1321,11 @@ UGMCAbilityEffect* UGMC_AbilitySystemComponent::ApplyAbilityEffect(UGMCAbilityEf
 			UE_LOG(LogGMCAbilitySystem, Error, TEXT("[ApplyAbilityEffect] Action Timer is 0, cannot generate Effect ID. Is it a listen server smoothed pawn?"));
 			return nullptr;
 		}
+
+		if (!CanApplyAbilityEffect(Effect))
+		{
+			return nullptr;
+		}
 		
 		int NewEffectID = static_cast<int>(ActionTimer * 100);
 		while (ActiveEffects.Contains(NewEffectID))
