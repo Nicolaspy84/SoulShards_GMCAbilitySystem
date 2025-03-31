@@ -21,6 +21,13 @@ struct FAttributeData{
 	UPROPERTY(EditDefaultsOnly, Category = "Attribute", meta = (Categories = "Attribute"))
 	FGameplayTag RegenAttributeTag{ FGameplayTag::EmptyTag };
 
+	/**
+	* List of all active tags which block the regeneration of this attribute.
+	* If any of these tags is in the ability system's active tags, the regeneration will not tick.
+	*/
+	UPROPERTY(EditDefaultsOnly, Category = "Attribute", meta = (Categories = "State|Effect"))
+	FGameplayTagContainer RegenBlockingTags;
+
 	UPROPERTY(EditDefaultsOnly, Category = "GMCAbilitySystem")
 	float DefaultValue = 0.f;
 

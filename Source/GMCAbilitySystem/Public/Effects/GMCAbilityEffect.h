@@ -85,7 +85,10 @@ struct FGMCAbilityEffectData
 	UPROPERTY()
 	bool bNegateEffectAtEnd = false;
 
-	// Delay before the effect starts
+	/**
+	* Delay before the effect starts.
+	* Whilst this delay is running, the effect will not yet exist, so it can't be dispelled.
+	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	double Delay = 0;
 
@@ -101,6 +104,13 @@ struct FGMCAbilityEffectData
 	// For Period effects, whether first tick should happen immediately
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	bool bPeriodTickAtStart = false;
+
+	/**
+	* For periodic effect, the period will only start after this delay.
+	* Note that this means that the effect will be active, even when the period hasn't started yet.
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	double PeriodInitialDelay = 0;
 
 	// Time in seconds that the client has to apply itself an external effect before the server will force it. If this time is reach, a rollback is likely to happen.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
@@ -308,7 +318,7 @@ protected:
 
 private:
 	// Used for calculating when to tick Period effects
-	float PrevPeriodMod = 0;
+	float PrevPeriodMod = -1.f;
 
 public:
 	FString ToString() {

@@ -103,7 +103,8 @@ void UGMCAbilityEffect::StartEffect()
 	// Tick period at start
 	if (EffectData.bPeriodTickAtStart && EffectData.Period > 0)
 	{
-		PeriodTick();
+		// This will force the initial period tick to automatically be triggered.
+		PrevPeriodMod = 1000000.f;
 	}
 				
 	// Instant effects instantly end
@@ -225,10 +226,11 @@ void UGMCAbilityEffect::Tick(float DeltaTime)
 
 
 	// If there's a period, check to see if it's time to tick
-	if (!IsPeriodPaused() && EffectData.Period > 0 && CurrentState == EGMASEffectState::Started)
+	if (!IsPeriodPaused() && EffectData.Period > 0 && CurrentState == EGMASEffectState::Started &&
+		OwnerAbilityComponent->ActionTimer >= EffectData.StartTime + EffectData.PeriodInitialDelay)
 	{
-		const float Mod = FMath::Fmod(OwnerAbilityComponent->ActionTimer, EffectData.Period);
-		if (Mod < PrevPeriodMod)
+		const float Mod = FMath::Fmod(OwnerAbilityComponent->ActionTimer - (EffectData.StartTime + EffectData.PeriodInitialDelay), EffectData.Period);
+		if (Mod <= PrevPeriodMod)
 		{
 			PeriodTick();
 		}

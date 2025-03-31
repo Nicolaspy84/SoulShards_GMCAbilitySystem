@@ -650,6 +650,7 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 			FAttribute NewAttribute;
 			NewAttribute.Tag = AttributeData.AttributeTag;
 			NewAttribute.RegenAttributeTag = AttributeData.RegenAttributeTag;
+			NewAttribute.RegenBlockingTags = AttributeData.RegenBlockingTags;
 			NewAttribute.BaseValue = AttributeData.DefaultValue;
 			NewAttribute.Clamp = AttributeData.Clamp;
 			NewAttribute.Clamp.AbilityComponent = this;
