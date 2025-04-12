@@ -1628,7 +1628,6 @@ void UGMC_AbilitySystemComponent::ApplyAbilityEffectModifier(FGMCAttributeModifi
 			}
 		}
 		
-
 		BoundAttributes.MarkAttributeDirty(*AffectedAttribute);
 		UnBoundAttributes.MarkAttributeDirty(*AffectedAttribute);
 		if (!AffectedAttribute->bIsGMCBound) {
@@ -1639,6 +1638,13 @@ void UGMC_AbilitySystemComponent::ApplyAbilityEffectModifier(FGMCAttributeModifi
 		for (const FGameplayTag& AttributeClampedBySelf : AffectedAttribute->AttributesClampedBySelf)
 		{
 			const FAttribute* ClampedAttribute = GetAttributeByTag(AttributeClampedBySelf);
+
+			// If the value has changed and we are performing a max clamp, we need to broadcast a change.
+			if (ClampedAttribute && OldValue != AffectedAttribute->Value && ClampedAttribute->Clamp.MaxAttributeTag == AttributeModifier.AttributeTag)
+			{
+				OnAttributeMaxClampChanged(ClampedAttribute->Tag, AttributeModifier.AttributeTag, OldValue, AffectedAttribute->Value);
+			}
+
 			// We know that we need to update the value if the clamp is different from its current value.
 			if (ClampedAttribute && ClampedAttribute->Value != ClampedAttribute->Clamp.ClampValue(ClampedAttribute->Value))
 			{

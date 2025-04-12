@@ -360,6 +360,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="GMAS|Attributes")
 	void ApplyAbilityEffectModifier(FGMCAttributeModifier AttributeModifier,bool bModifyBaseValue, bool bNegateValue = false, UGMC_AbilitySystemComponent* SourceAbilityComponent = nullptr);
 
+	virtual void OnAttributeMaxClampChanged(const FGameplayTag& ClampedAttribute, const FGameplayTag& MaxAttribute, float OldMaxValue, float NewMaxValue) {};
+
 	UPROPERTY(BlueprintReadWrite, Category = "GMCAbilitySystem")
 	bool bJustTeleported;
 
