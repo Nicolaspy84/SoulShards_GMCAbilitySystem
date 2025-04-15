@@ -975,14 +975,14 @@ void UGMC_AbilitySystemComponent::ServerHandlePendingEffect(float DeltaTime) {
 					FGMCAbilityEffectData EffectData = Data.InitializationData.IsValid() ?  Data.InitializationData : AbilityEffect->EffectData;
 					UGMCAbilityEffect* FX = ApplyAbilityEffect(AbilityEffect, EffectData);
 					if (Wrapper.ClientGraceTimeRemaining <= 0.f) {
-						UE_LOG(LogGMCAbilitySystem, Log, TEXT("Client Add Effect `%s ` Missed Grace time, Force application : id: %d"), *GetNameSafe(Data.EffectClass), FX->EffectData.EffectID);
+						UE_LOG(LogGMCAbilitySystem, Log, TEXT("Client add effect of class %s with tag %s missed grace time, forcing application with id: %d"), *GetNameSafe(Data.EffectClass), *EffectData.EffectTag.ToString(), FX->EffectData.EffectID);
 					}
 				} break;
 				case EGMC_RemoveEffect: {
 					const FGMCOuterEffectRemove& Data = Wrapper.OuterApplicationData.Get<FGMCOuterEffectRemove>();
 					RemoveEffectById(Data.Ids);
 					if (Wrapper.ClientGraceTimeRemaining <= 0.f) {
-						UE_LOG(LogGMCAbilitySystem, Log, TEXT("Client Remove Effect Missed Grace time, Force remove"));
+						UE_LOG(LogGMCAbilitySystem, Log, TEXT("Client remove effect missed grace time, force removing"));
 					}
 				} break;
 			}
