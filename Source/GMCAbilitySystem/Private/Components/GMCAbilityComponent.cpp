@@ -936,7 +936,7 @@ void UGMC_AbilitySystemComponent::CheckRemovedEffects()
 void UGMC_AbilitySystemComponent::AddPendingEffectApplications(FGMCOuterApplicationWrapper& Wrapper, float ClientGraceTime) {
 	check(HasAuthority())
 
-	Wrapper.ClientGraceTimeRemaining = ClientGraceTime;
+	Wrapper.ClientGraceTimeRemaining = ClientGraceTime > 0.f ? ClientGraceTime : -10000.f;
 	Wrapper.LateApplicationID = GenerateLateApplicationID();
 
 	PendingApplicationServer.Add(Wrapper);
@@ -974,14 +974,18 @@ void UGMC_AbilitySystemComponent::ServerHandlePendingEffect(float DeltaTime) {
 					AbilityEffect->EffectData.EffectID = Wrapper.LateApplicationID;
 					FGMCAbilityEffectData EffectData = Data.InitializationData.IsValid() ?  Data.InitializationData : AbilityEffect->EffectData;
 					UGMCAbilityEffect* FX = ApplyAbilityEffect(AbilityEffect, EffectData);
-					if (Wrapper.ClientGraceTimeRemaining <= 0.f) {
+					// If the client grace time remaining is below below -1000, it means that it was an outer activation with no client grace time.
+					// In other words, we expect the server to apply the effect without ever telling the client to apply it.
+					if (Wrapper.ClientGraceTimeRemaining <= 0.f && Wrapper.ClientGraceTimeRemaining >= -100.f) {
 						UE_LOG(LogGMCAbilitySystem, Log, TEXT("Client add effect of class %s with tag %s missed grace time, forcing application with id: %d"), *GetNameSafe(Data.EffectClass), *EffectData.EffectTag.ToString(), FX->EffectData.EffectID);
 					}
 				} break;
 				case EGMC_RemoveEffect: {
 					const FGMCOuterEffectRemove& Data = Wrapper.OuterApplicationData.Get<FGMCOuterEffectRemove>();
 					RemoveEffectById(Data.Ids);
-					if (Wrapper.ClientGraceTimeRemaining <= 0.f) {
+					// If the client grace time remaining is below below -1000, it means that it was an outer activation with no client grace time.
+					// In other words, we expect the server to apply the effect without ever telling the client to apply it.
+					if (Wrapper.ClientGraceTimeRemaining <= 0.f && Wrapper.ClientGraceTimeRemaining >= -100.f) {
 						UE_LOG(LogGMCAbilitySystem, Log, TEXT("Client remove effect missed grace time, force removing"));
 					}
 				} break;
