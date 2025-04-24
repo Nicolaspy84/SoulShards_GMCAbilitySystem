@@ -289,10 +289,10 @@ public:
 	float ClientEffectApplicationTime;
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "GMCAbilitySystem")
+	UPROPERTY()
 	UGMC_AbilitySystemComponent* SourceAbilityComponent;
 
-	UPROPERTY(BlueprintReadOnly, Category = "GMCAbilitySystem")
+	UPROPERTY()
 	UGMC_AbilitySystemComponent* OwnerAbilityComponent;
 
 	// Tags
