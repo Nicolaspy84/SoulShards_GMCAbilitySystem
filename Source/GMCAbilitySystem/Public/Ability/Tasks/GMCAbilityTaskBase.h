@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "InstancedStruct.h"
 #include "Ability/GMCAbility.h"
 #include "Ability/Tasks/GMCAbilityTaskData.h"
@@ -70,6 +70,8 @@ public:
 	};
 
 protected:
+	bool bUseHeartbeat = true;
+
 	bool bTaskCompleted;
 
 	/** Task Owner that created us */
@@ -77,10 +79,10 @@ protected:
 
 private:
 	// How often client sends heartbeats to server
-	float HeartbeatInterval = .5f;
+	float HeartbeatInterval = .4f;
 
 	// Max time between heartbeats before server cancels task
-	float HeartbeatMaxInterval = 1.f;
+	float HeartbeatMaxInterval = 1.3f;
 	
 	float ClientLastHeartbeatSentTime;
 	float LastHeartbeatReceivedTime;

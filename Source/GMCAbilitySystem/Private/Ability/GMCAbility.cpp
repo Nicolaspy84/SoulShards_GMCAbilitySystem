@@ -154,12 +154,16 @@ void UGMCAbility::ResetBlockOtherAbility() {
 void UGMCAbility::HandleTaskData(int TaskID, FInstancedStruct TaskData)
 {
 	const FGMCAbilityTaskData TaskDataFromInstance = TaskData.Get<FGMCAbilityTaskData>();
-	if (RunningTasks.Contains(TaskID) && RunningTasks[TaskID] != nullptr)
+	if (RunningTasks.Contains(TaskID))
 	{
-		if (TaskDataFromInstance.TaskType == EGMCAbilityTaskDataType::Progress)
+		if (RunningTasks[TaskID] != nullptr && TaskDataFromInstance.TaskType == EGMCAbilityTaskDataType::Progress)
 		{
 			RunningTasks[TaskID]->ProgressTask(TaskData);
 		}
+	}
+	else
+	{
+		UE_LOG(LogGMCAbilitySystem, Error, TEXT("Ability %s was provided with task id %d but not task exists with this ID"), *GetName(), TaskID);
 	}
 }
 

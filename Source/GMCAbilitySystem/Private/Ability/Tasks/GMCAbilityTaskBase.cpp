@@ -1,9 +1,7 @@
-﻿#include "Ability/Tasks/GMCAbilityTaskBase.h"
+#include "Ability/Tasks/GMCAbilityTaskBase.h"
 
 #include "GMCAbilityComponent.h"
 #include "Ability/GMCAbility.h"
-
-
 
 void UGMCAbilityTaskBase::Activate()
 {
@@ -30,6 +28,11 @@ void UGMCAbilityTaskBase::RegisterTask(UGMCAbilityTaskBase* Task)
 
 void UGMCAbilityTaskBase::Tick(float DeltaTime)
 {
+	if (!bUseHeartbeat)
+	{
+		return;
+	}
+
 	// Locally controlled server pawns don't need to send heartbeats
 	if (AbilitySystemComponent->GMCMovementComponent->IsLocallyControlledServerPawn()) return;
 	
@@ -44,11 +47,9 @@ void UGMCAbilityTaskBase::Tick(float DeltaTime)
 	}
 	else if (LastHeartbeatReceivedTime + HeartbeatMaxInterval < AbilitySystemComponent->ActionTimer)
 	{
-		UE_LOG(LogGMCReplication, Error, TEXT("Server Task Heartbeat Timeout, Cancelling Ability: %s"), *Ability->GetName());
+		UE_LOG(LogGMCReplication, Error, TEXT("Server Task %s Heartbeat Timeout, Cancelling Ability: %s"), *GetName(), *Ability->GetName());
 		Ability->EndAbility();
-		EndTask();
 	}
-
 }
 
 void UGMCAbilityTaskBase::AncillaryTick(float DeltaTime){
