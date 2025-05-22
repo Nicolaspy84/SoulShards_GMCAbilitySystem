@@ -936,11 +936,14 @@ void UGMC_AbilitySystemComponent::CheckRemovedEffects()
 void UGMC_AbilitySystemComponent::AddPendingEffectApplications(FGMCOuterApplicationWrapper& Wrapper, float ClientGraceTime) {
 	check(HasAuthority())
 
-	Wrapper.ClientGraceTimeRemaining = ClientGraceTime > 0.f ? ClientGraceTime : -10000.f;
+	APawn* PawnOwner = Cast<APawn>(GetOwner());
+	bool bUseGraceTime = ClientGraceTime > 0.f && IsValid(PawnOwner) && IsValid(Cast<APlayerController>(PawnOwner->GetController()));
+
+	Wrapper.ClientGraceTimeRemaining = bUseGraceTime ? ClientGraceTime : -10000.f;
 	Wrapper.LateApplicationID = GenerateLateApplicationID();
 
 	PendingApplicationServer.Add(Wrapper);
-	if (ClientGraceTime > 0.f)
+	if (bUseGraceTime)
 	{
 		RPCClientAddPendingEffectApplication(Wrapper);
 	}
