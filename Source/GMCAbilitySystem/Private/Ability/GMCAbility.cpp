@@ -156,7 +156,9 @@ void UGMCAbility::HandleTaskData(int TaskID, FInstancedStruct TaskData)
 	const FGMCAbilityTaskData TaskDataFromInstance = TaskData.Get<FGMCAbilityTaskData>();
 	if (RunningTasks.Contains(TaskID))
 	{
-		if (RunningTasks[TaskID] != nullptr && TaskDataFromInstance.TaskType == EGMCAbilityTaskDataType::Progress)
+		// We make sure that the task is active - if it's not, we should not progress it.
+		if (RunningTasks[TaskID] != nullptr && RunningTasks[TaskID]->GetState() == EGameplayTaskState::Active &&
+			TaskDataFromInstance.TaskType == EGMCAbilityTaskDataType::Progress)
 		{
 			RunningTasks[TaskID]->ProgressTask(TaskData);
 		}
