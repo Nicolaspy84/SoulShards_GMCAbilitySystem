@@ -250,7 +250,7 @@ void UGMC_AbilitySystemComponent::RemoveAbilityMapData(UGMCAbilityMapData* Abili
 
 void UGMC_AbilitySystemComponent::AddStartingEffects(TArray<TSubclassOf<UGMCAbilityEffect>> EffectsToAdd)
 {
-	for (const TSubclassOf<UGMCAbilityEffect> Effect : EffectsToAdd)
+	for (const TSubclassOf<UGMCAbilityEffect>& Effect : EffectsToAdd)
 	{
 		StartingEffects.AddUnique(Effect);
 	}
@@ -258,7 +258,7 @@ void UGMC_AbilitySystemComponent::AddStartingEffects(TArray<TSubclassOf<UGMCAbil
 
 void UGMC_AbilitySystemComponent::RemoveStartingEffects(TArray<TSubclassOf<UGMCAbilityEffect>> EffectsToRemove)
 {
-	for (const TSubclassOf<UGMCAbilityEffect> Effect : EffectsToRemove)
+	for (const TSubclassOf<UGMCAbilityEffect>& Effect : EffectsToRemove)
 	{
 		StartingEffects.Remove(Effect);
 	}
@@ -646,7 +646,7 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 			continue;
 		}
 		
-		for(const FAttributeData AttributeData : AttributeDataAsset->AttributeData){
+		for(const FAttributeData& AttributeData : AttributeDataAsset->AttributeData){
 			FAttribute NewAttribute;
 			NewAttribute.Tag = AttributeData.AttributeTag;
 			NewAttribute.RegenAttributeTag = AttributeData.RegenAttributeTag;
