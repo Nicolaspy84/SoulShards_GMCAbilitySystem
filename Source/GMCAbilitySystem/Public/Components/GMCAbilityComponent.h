@@ -188,7 +188,7 @@ public:
 	virtual void EndAbilitiesOnSameChannel(const UGMCAbility* AbilityCDO) {};
 	
 	// Queue an ability to be executed
-	virtual void QueueAbility(FGameplayTag InputTag, const UInputAction* InputAction = nullptr);
+	virtual void QueueAbility(FGameplayTag InputTag, const UInputAction* InputAction = nullptr, bool bIsInputActionTrigger = false);
 
 	UFUNCTION(BlueprintCallable, DisplayName="Count Queued Ability Instances", Category="GMAS|Abilities")
 	int32 GetQueuedAbilityCount(FGameplayTag AbilityTag);
